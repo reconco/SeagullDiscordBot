@@ -10,14 +10,19 @@ namespace SeagullDiscordBot
 {
 	public class Program
 	{
-		private static BotClient _botClient;
-		private static CancellationTokenSource _cts;
+		private static BotClient _botClient = new BotClient();
+		private static CancellationTokenSource _cts = new CancellationTokenSource();
 		private static ConsoleCommandHandler _consoleCommandHandler = new ConsoleCommandHandler();
+		private static InteractionHandler _interactionHandler;
+
+		public static InteractionHandler InteractionHandler
+		{
+			get { return _interactionHandler; }
+			set { _interactionHandler = value; }
+		}
 
 		public static async Task Main()
 		{
-			_cts = new CancellationTokenSource();
-
 			// 콘솔 종료 이벤트 처리
 			Console.CancelKeyPress += Console_CancelKeyPress;
 			AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
@@ -26,12 +31,15 @@ namespace SeagullDiscordBot
 			Logger.CreateLogFile();
 
 			// 봇 클라이언트 초기화
-			_botClient = new BotClient();
 			await _botClient.InitializeAsync();
 
 			// 이벤트 핸들러 초기화
 			var eventHandler = new EventHandler(_botClient.Client);
 			eventHandler.Initialize();
+
+			// 인터랙션 핸들러 초기화
+			_interactionHandler = new InteractionHandler(_botClient.Client, _botClient.InteractionService);
+			await _interactionHandler.InitializeAsync();
 
 			// 명령어 핸들러 초기화
 			//var commandHandler = new CommandHandler(botClient.Client, botClient.Commands);

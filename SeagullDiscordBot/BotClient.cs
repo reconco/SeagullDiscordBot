@@ -13,6 +13,7 @@ namespace SeagullDiscordBot
 		private readonly InteractionService _interactionService;
 		public DiscordSocketClient Client => _client;
 		public CommandService Commands => _commands;
+		public InteractionService InteractionService => _interactionService;
 
 		public BotClient()
 		{

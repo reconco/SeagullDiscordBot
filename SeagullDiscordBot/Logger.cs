@@ -105,6 +105,8 @@ namespace SeagullDiscordBot
 				fontColor = ConsoleColor.Red;
 			else if (logType == LogType.STATUS)
 				fontColor = ConsoleColor.Green;
+			else if (logType == LogType.ONLY_CONSOLE)
+				fontColor = ConsoleColor.DarkGreen;
 
 			string printStr = timeStr + preStr + logString;
 

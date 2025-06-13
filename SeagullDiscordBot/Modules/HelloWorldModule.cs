@@ -30,5 +30,15 @@ namespace SeagullDiscordBot.Modules
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 greet 명령어로 '{name}'에게 인사했습니다.");
 		}
+
+		// 추가 명령어: 이름을 지정하여 인사하는 명령어
+		[SlashCommand("hello_msg", "인사 메시지.")]
+		public async Task HelloMsgCommand()
+		{
+			await Context.Channel.SendMessageAsync($"Hello!");
+
+			// 로그 남기기
+			Logger.Print($"'{Context.User.Username}'님이 hello_msg 명령어로 인사했습니다.");
+		}
 	}
 }

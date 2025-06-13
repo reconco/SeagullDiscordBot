@@ -17,7 +17,16 @@ namespace SeagullDiscordBot
 
 		public BotClient()
 		{
-			var socketConfig = new DiscordSocketConfig { MessageCacheSize = 100 };
+			var socketConfig = new DiscordSocketConfig
+			{
+				MessageCacheSize = 100,
+				GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildVoiceStates | GatewayIntents.GuildMembers
+
+				//권한이 필요한 인텐트
+				//GatewayIntents.GuildMembers: 서버 멤버 관련 이벤트
+				//GatewayIntents.GuildPresences: 사용자 상태 변경 이벤트
+				//GatewayIntents.MessageContent: 메시지 내용 접근
+			};
 			_client = new DiscordSocketClient(socketConfig);
 			_commands = new CommandService();
 			_interactionService = new InteractionService(_client.Rest);

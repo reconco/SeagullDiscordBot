@@ -6,35 +6,10 @@ using System.Threading.Tasks;
 
 namespace SeagullDiscordBot.Services
 {
+
+
 	public class ChannelService
 	{
-		public class ChannelResult
-		{
-			public bool Success { get; set; }
-			public string Message { get; set; }
-			public ITextChannel Channel { get; set; }
-			public string ErrorMessage { get; set; }
-
-			public static ChannelResult Successful(ITextChannel channel, string message)
-			{
-				return new ChannelResult
-				{
-					Success = true,
-					Channel = channel,
-					Message = message
-				};
-			}
-
-			public static ChannelResult Failed(string errorMessage)
-			{
-				return new ChannelResult
-				{
-					Success = false,
-					ErrorMessage = errorMessage
-				};
-			}
-		}
-
 		/// <summary>
 		/// 채널 이름이 이미 존재하는지 확인합니다.
 		/// </summary>
@@ -183,6 +158,7 @@ namespace SeagullDiscordBot.Services
 				if (existingChannel != null)
 				{
 					Logger.Print($"'{username}'님이 요청한 '{channelName}' 텍스트 채널이 이미 존재합니다.", LogType.WARNING);
+					
 					return ChannelResult.Successful(
 						existingChannel,
 						$"텍스트 채널 '{existingChannel.Name}'이(가) 이미 {categoryMessage}존재합니다."

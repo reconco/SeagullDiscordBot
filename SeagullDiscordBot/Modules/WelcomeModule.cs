@@ -56,9 +56,10 @@ namespace SeagullDiscordBot.Modules
                     .WithFooter(footer => footer.Text = $"{user.Guild.Name}에 오신 것을 환영합니다")
                     .Build();
 
+				await channel.SendMessageAsync($"Welcome '{user.Nickname}'!");
 
-                //왜 메시지 전송이 안되는지 모르겠음
-				await channel.SendMessageAsync(embed: embed);
+				//왜 메시지 전송이 안되는지 모르겠음
+                await channel.SendMessageAsync(embed: embed);
 
 				// 로그 남기기
 				Logger.Print($"'{user.Username}'님이 '{user.Guild.Name}' 서버에 입장했습니다. {channel.Name}에 환영 메시지를 전송했습니다.");

@@ -35,7 +35,9 @@ namespace SeagullDiscordBot.Modules
 		[SlashCommand("hello_msg", "인사 메시지.")]
 		public async Task HelloMsgCommand()
 		{
-			await Context.Channel.SendMessageAsync($"Hello!");
+			await RespondAsync($"hello_msg");
+
+			await Context.Channel.SendMessageAsync($"Hello! hello_msg");
 
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 hello_msg 명령어로 인사했습니다.");

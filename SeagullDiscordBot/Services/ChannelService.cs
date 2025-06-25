@@ -188,5 +188,92 @@ namespace SeagullDiscordBot.Services
 				return ChannelResult.Failed(ex.Message);
 			}
 		}
+
+		/// <summary>
+		/// 채널에서 특정 역할의 권한을 가져옵니다.
+		/// </summary>
+		/// <param name="channel">권한을 확인할 채널</param>
+		/// <param name="role">확인할 역할</param>
+		/// <returns>해당 역할의 채널 권한</returns>
+		public OverwritePermissions GetRolePermissions(IGuildChannel channel, IRole role)
+		{
+			// 채널의 권한 오버라이드 중 해당 역할에 대한 권한 찾기
+			var permissionOverwrite = channel.GetPermissionOverwrite(role);
+
+			// 권한 오버라이드가 없으면 기본값 반환
+			return permissionOverwrite ?? OverwritePermissions.InheritAll;
+		}
+
+		/// <summary>
+		/// 채널에서 특정 역할의 권한을 설정합니다.
+		/// </summary>
+		/// <param name="channel">권한을 설정할 채널</param>
+		/// <param name="role">권한을 설정할 역할</param>
+		/// <param name="permissions">설정할 권한</param>
+		/// <param name="requestedBy">권한 변경을 요청한 사용자 이름</param>
+		/// <returns>권한 설정 결과</returns>
+		public async Task<ServiceResult> SetRolePermissionsAsync(IGuildChannel channel, IRole role, OverwritePermissions permissions, string requestedBy)
+		{
+			try
+			{
+				// 채널에 역할 권한 설정
+				await channel.AddPermissionOverwriteAsync(role, permissions);
+
+				Logger.Print($"'{requestedBy}'님이 '{channel.Name}' 채널에서 '{role.Name}' 역할의 권한을 변경했습니다.");
+				return ServiceResult.Successful($"'{channel.Name}' 채널에서 '{role.Name}' 역할의 권한이 성공적으로 변경되었습니다.");
+			}
+			catch (Exception ex)
+			{
+				Logger.Print($"채널 권한 설정 중 오류 발생: {ex.Message}", LogType.ERROR);
+				return ServiceResult.Failed(ex.Message);
+			}
+		}
+
+		/// <summary>
+		/// 채널에서 특정 역할에 읽기/쓰기 권한을 설정합니다.
+		/// </summary>
+		/// <param name="channel">권한을 설정할 채널</param>
+		/// <param name="role">권한을 설정할 역할</param>
+		/// <param name="canRead">읽기 권한 여부</param>
+		/// <param name="canWrite">쓰기 권한 여부</param>
+		/// <param name="requestedBy">권한 변경을 요청한 사용자 이름</param>
+		/// <returns>권한 설정 결과</returns>
+		public async Task<ServiceResult> SetRoleReadWritePermissionsAsync(
+			IGuildChannel channel,
+			IRole role,
+			bool canRead,
+			bool canWrite,
+			string requestedBy)
+		{
+			try
+			{
+				// 권한 객체 생성
+				var permissions = new OverwritePermissions(
+					viewChannel: canRead ? PermValue.Allow : PermValue.Deny,
+					sendMessages: canWrite ? PermValue.Allow : PermValue.Deny
+				);
+
+				// 채널에 권한 설정
+				await channel.AddPermissionOverwriteAsync(role, permissions);
+
+				// 로그 메시지 구성
+				string permissionMsg = canRead && canWrite
+					? "읽기/쓰기 권한을 부여"
+					: canRead
+						? "읽기 권한만 부여"
+						: canWrite
+							? "쓰기 권한만 부여"
+							: "읽기/쓰기 권한을 제거";
+
+				Logger.Print($"'{requestedBy}'님이 '{channel.Name}' 채널에서 '{role.Name}' 역할에 {permissionMsg}했습니다.");
+				return ServiceResult.Successful($"'{channel.Name}' 채널에서 '{role.Name}' 역할에 {permissionMsg}되었습니다.");
+			}
+			catch (Exception ex)
+			{
+				Logger.Print($"채널 권한 설정 중 오류 발생: {ex.Message}", LogType.ERROR);
+				return ServiceResult.Failed(ex.Message);
+			}
+		}
 	}
+
 }

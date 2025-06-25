@@ -17,13 +17,6 @@ namespace SeagullDiscordBot.Modules
 				.Where(u => u.DisplayName.Equals(username, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 
-			//// 닉네임으로 일치하는 사용자도 찾기
-			//var nicknameMatchingUsers = Context.Guild.Users
-			//	.Where(u => u.Nickname != null && u.Nickname.Equals(username, StringComparison.OrdinalIgnoreCase))
-			//	.ToList();
-
-			//matchingUsers.AddRange(nicknameMatchingUsers);
-
 			if (!matchingUsers.Any())
 			{
 				await RespondAsync($"서버에서 '{username}' 사용자를 찾을 수 없습니다.", ephemeral: true);
@@ -35,9 +28,9 @@ namespace SeagullDiscordBot.Modules
 			{
 				var user = matchingUsers.First();
 				var builder = new ComponentBuilder()
-							.WithButton("메시지 삭제 시작", $"remove_user_messages_button:{user.Id}", ButtonStyle.Danger);
+							.WithButton("메시지 삭제", $"remove_user_messages_button:{user.Id}", ButtonStyle.Danger);
 
-				await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.Username}#{user.Discriminator}' 사용자의 모든 메시지를 삭제하시겠습니까?", components: builder.Build(), ephemeral: true);
+				await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.DisplayName}({user.Username}, {user.Id})' 사용자의 모든 메시지를 삭제하시겠습니까?", components: builder.Build(), ephemeral: true);
 
 				// 로그 남기기
 				Logger.Print($"'{Context.User.Username}'님이 '{user.Username}' 사용자의 메시지 삭제 명령어를 사용했습니다.");
@@ -55,9 +48,9 @@ namespace SeagullDiscordBot.Modules
 				foreach (var user in matchingUsers.Take(25))
 				{
 					selectBuilder.AddOption(
-						$"{user.Username}#{user.Discriminator}",
-						user.Id.ToString(),
-						$"서버 닉네임: {user.Nickname ?? "없음"}"
+						$"{user.DisplayName}({user.Username}, {user.Id})",
+						user.JoinedAt.ToString(),
+						$"서버 가입일: {user.JoinedAt}"
 					);
 				}
 
@@ -92,9 +85,9 @@ namespace SeagullDiscordBot.Modules
 			}
 
 			var builder = new ComponentBuilder()
-				.WithButton("메시지 삭제 시작", $"remove_user_messages_button:{user.Id}", ButtonStyle.Danger);
+				.WithButton("메시지 삭제", $"remove_user_messages_button:{user.Id}", ButtonStyle.Danger);
 
-			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.Username}#{user.Discriminator}' 사용자의 모든 메시지를 삭제하시겠습니까?", components: builder.Build(), ephemeral: true);
+			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.DisplayName}({user.Username}, {user.Id})' 사용자의 모든 메시지를 삭제하시겠습니까?", components: builder.Build(), ephemeral: true);
 
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 선택 메뉴에서 '{user.Username}' 사용자를 선택했습니다.");
@@ -111,7 +104,7 @@ namespace SeagullDiscordBot.Modules
 				return;
 			}
 
-			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.Username}#{user.Discriminator}' 사용자의 모든 메시지를 삭제합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
+			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.DisplayName}({user.Username}, {user.Id})' 사용자의 모든 메시지를 삭제합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
 
 			Logger.Print($"'{Context.User.Username}'님이 '{user.Username}' 사용자의 메시지 삭제 버튼을 클릭했습니다.");
 
@@ -197,12 +190,12 @@ namespace SeagullDiscordBot.Modules
 						// 메시지가 적거나 1000개 이상 체크했으면 진행 상황 업데이트
 						if (messagesList.Count < 20 || totalChecked % 1000 == 0)
 						{
-							await FollowupAsync($"'{user.Username}' 사용자의 메시지 삭제 중... 현재 {totalChecked}개의 메시지를 확인했고, {deletedCount}개의 메시지를 삭제했습니다.", ephemeral: true);
+							await FollowupAsync($"{user.DisplayName}({user.Username}, {user.Id})' 사용자의 메시지 삭제 중...({deletedCount} / {totalChecked})", ephemeral: true);
 						}
 					}
 				}
 
-				await FollowupAsync($"삭제 완료! '{user.Username}' 사용자의 메시지 {deletedCount}개를 삭제했습니다. (총 {totalChecked}개의 메시지 확인)", ephemeral: true);
+				await FollowupAsync($"삭제 완료! ({deletedCount} / {totalChecked})", ephemeral: true);
 				Logger.Print($"'{Context.User.Username}'님이 '{Context.Channel.Name}' 채널에서 '{user.Username}' 사용자의 메시지 {deletedCount}개를 삭제했습니다.");
 			}
 			catch (Exception ex)

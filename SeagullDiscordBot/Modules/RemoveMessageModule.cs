@@ -49,7 +49,7 @@ namespace SeagullDiscordBot.Modules
 				{
 					selectBuilder.AddOption(
 						$"{user.DisplayName}({user.Username}, {user.Id})",
-						user.JoinedAt.ToString(),
+						user.Id.ToString(),
 						$"서버 가입일: {user.JoinedAt}"
 					);
 				}
@@ -63,10 +63,12 @@ namespace SeagullDiscordBot.Modules
 				Logger.Print($"'{Context.User.Username}'님이 '{username}' 사용자 검색 시 여러 사용자가 발견되어 선택 메뉴를 표시했습니다.");
 			}
 		}
+
 		// 사용자 선택 메뉴 핸들러
 		[ComponentInteraction("user_selection_menu")]
 		public async Task HandleUserSelection(string[] selectedValues)
 		{
+			Logger.Print(selectedValues[0]);
 			if (selectedValues.Length == 0)
 			{
 				await RespondAsync("사용자를 선택하지 않았습니다.", ephemeral: true);
@@ -76,6 +78,7 @@ namespace SeagullDiscordBot.Modules
 			// 선택된 사용자 ID 가져오기
 			string userId = selectedValues[0];
 
+			Logger.Print("1");
 			// 해당 ID로 사용자 찾기
 			var user = Context.Guild.GetUser(ulong.Parse(userId));
 			if (user == null)
@@ -83,10 +86,12 @@ namespace SeagullDiscordBot.Modules
 				await RespondAsync("선택한 사용자를 찾을 수 없습니다.", ephemeral: true);
 				return;
 			}
+			Logger.Print("2");
 
 			var builder = new ComponentBuilder()
 				.WithButton("메시지 삭제", $"remove_user_messages_button:{user.Id}", ButtonStyle.Danger);
 
+			Logger.Print("3");
 			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.DisplayName}({user.Username}, {user.Id})' 사용자의 모든 메시지를 삭제하시겠습니까?", components: builder.Build(), ephemeral: true);
 
 			// 로그 남기기
@@ -98,16 +103,63 @@ namespace SeagullDiscordBot.Modules
 		{
 			// userId로 사용자 찾기
 			var user = Context.Guild.GetUser(ulong.Parse(userId));
-			if (user == null)
+			string displayName = user != null ? $"{user.DisplayName}({user.Username})" : "알 수 없음";
+
+			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{displayName}, {userId}' 사용자의 모든 메시지를 삭제합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
+
+			Logger.Print($"'{Context.User.Username}'님이 '{displayName}' 사용자의 메시지 삭제 버튼을 클릭했습니다.");
+
+			// 메시지 삭제 로직 실행
+			await DeleteUserMessages(ulong.Parse(userId));
+		}
+
+
+
+		// 사용자 ID로 메시지 삭제하는 명령어 추가
+		[SlashCommand("remove_messages_by_id_number", "사용자 ID번호로 현재 채널에 있는 특정 사용자의 모든 메시지를 삭제합니다.")]
+		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
+		public async Task RemoveUserMessagesByIdCommand([Summary(description: "메시지를 삭제할 사용자의 ID")] string userId)
+		{
+			ulong id;
+			if (!ulong.TryParse(userId, out id))
 			{
-				await RespondAsync("선택한 사용자를 찾을 수 없습니다.", ephemeral: true);
+				await RespondAsync("올바른 사용자 ID를 입력하세요.", ephemeral: true);
 				return;
 			}
 
-			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{user.DisplayName}({user.Username}, {user.Id})' 사용자의 모든 메시지를 삭제합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
+			// 서버에 있는 사용자인지 확인
+			var user = Context.Guild.GetUser(id);
+			string displayName = user != null ? $"{user.DisplayName}({user.Username})" : "알 수 없음";
 
-			Logger.Print($"'{Context.User.Username}'님이 '{user.Username}' 사용자의 메시지 삭제 버튼을 클릭했습니다.");
+			var builder = new ComponentBuilder()
+						.WithButton("메시지 삭제", $"remove_messages_by_id_number_button:{id}", ButtonStyle.Danger);
 
+			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{displayName}, {id}' 사용자의 모든 메시지를 삭제하시겠습니까?", components: builder.Build(), ephemeral: true);
+
+			// 로그 남기기
+			Logger.Print($"'{Context.User.Username}'님이 ID '{id}' 사용자의 메시지 삭제 명령어를 사용했습니다.");
+		}
+
+		[ComponentInteraction("remove_messages_by_id_number_button:*")]
+		public async Task RemoveUserMessagesByIdButton(string userId)
+		{
+			ulong id = ulong.Parse(userId);
+
+			// 서버에 있는 사용자인지 확인
+			var user = Context.Guild.GetUser(id);
+			string displayName = user != null ? $"{user.DisplayName}({user.Username})" : "알 수 없음";
+
+			await RespondAsync($"'{Context.Channel.Name}' 채널에서 '{displayName}, {userId}' 사용자의 모든 메시지를 삭제합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
+
+			Logger.Print($"'{Context.User.Username}'님이 ID '{userId}' 사용자의 메시지 삭제 버튼을 클릭했습니다.");
+
+			// 메시지 삭제 로직 실행
+			await DeleteUserMessages(id);
+		}
+
+		// 메시지 삭제 로직을 분리하여 재사용 가능하게 함
+		private async Task DeleteUserMessages(ulong userId)
+		{
 			try
 			{
 				// 채널을 ITextChannel로 캐스팅
@@ -145,7 +197,7 @@ namespace SeagullDiscordBot.Modules
 						lastMessageId = messagesList.Last().Id;
 
 						// 해당 사용자의 메시지만 필터링
-						var userMessages = messagesList.Where(msg => msg.Author.Id == user.Id).ToList();
+						var userMessages = messagesList.Where(msg => msg.Author.Id == userId).ToList();
 						totalChecked += userMessages.Count;
 
 						if (userMessages.Any())
@@ -190,13 +242,13 @@ namespace SeagullDiscordBot.Modules
 						// 메시지가 적거나 1000개 이상 체크했으면 진행 상황 업데이트
 						if (messagesList.Count < 20 || totalChecked % 1000 == 0)
 						{
-							await FollowupAsync($"{user.DisplayName}({user.Username}, {user.Id})' 사용자의 메시지 삭제 중...({deletedCount} / {totalChecked})", ephemeral: true);
+							await FollowupAsync($"사용자 ID '{userId}'의 메시지 삭제 중...({deletedCount} / {totalChecked})", ephemeral: true);
 						}
 					}
 				}
 
 				await FollowupAsync($"삭제 완료! ({deletedCount} / {totalChecked})", ephemeral: true);
-				Logger.Print($"'{Context.User.Username}'님이 '{Context.Channel.Name}' 채널에서 '{user.Username}' 사용자의 메시지 {deletedCount}개를 삭제했습니다.");
+				Logger.Print($"'{Context.User.Username}'님이 '{Context.Channel.Name}' 채널에서 ID '{userId}'의 메시지 {deletedCount}개를 삭제했습니다.");
 			}
 			catch (Exception ex)
 			{

@@ -12,6 +12,9 @@ namespace SeagullDiscordBot.Modules
 	{
 		private readonly ChannelService _channelService;
 
+		const string PublicChannelName = "문의";
+		const string AdminChannelName = "공지";
+
 		public CreateNewChannelModule()
 		{
 			_channelService = new ChannelService();
@@ -28,12 +31,11 @@ namespace SeagullDiscordBot.Modules
 
 			var everyoneRole = Context.Guild.EveryoneRole;
 
-			const string permissionTargetChannel = "문의";
-			SocketGuildChannel targetChannel = FindChannelByName(Context, permissionTargetChannel);
+			SocketGuildChannel targetChannel = FindChannelByName(Context, PublicChannelName);
 			if(targetChannel == null)
 			{
-				await FollowupAsync($"권한을 가져올 '{permissionTargetChannel}' 채널을 찾을 수 없습니다.", ephemeral: true);
-				Logger.Print($"권한을 가져올 '{permissionTargetChannel}' 채널을 찾을 수 없습니다.");
+				await FollowupAsync($"권한을 가져올 '{PublicChannelName}' 채널을 찾을 수 없습니다.", ephemeral: true);
+				Logger.Print($"권한을 가져올 '{PublicChannelName}' 채널을 찾을 수 없습니다.");
 				return;
 			}
 
@@ -80,12 +82,11 @@ namespace SeagullDiscordBot.Modules
 
 			var everyoneRole = Context.Guild.EveryoneRole;
 
-			const string permissionTargetChannel = "공지";
-			SocketGuildChannel targetChannel = FindChannelByName(Context, permissionTargetChannel);
+			SocketGuildChannel targetChannel = FindChannelByName(Context, AdminChannelName);
 			if (targetChannel == null)
 			{
-				await FollowupAsync($"권한을 가져올 '{permissionTargetChannel}' 채널을 찾을 수 없습니다.", ephemeral: true);
-				Logger.Print($"권한을 가져올 '{permissionTargetChannel}' 채널을 찾을 수 없습니다.");
+				await FollowupAsync($"권한을 가져올 '{AdminChannelName}' 채널을 찾을 수 없습니다.", ephemeral: true);
+				Logger.Print($"권한을 가져올 '{AdminChannelName}' 채널을 찾을 수 없습니다.");
 				return;
 			}
 

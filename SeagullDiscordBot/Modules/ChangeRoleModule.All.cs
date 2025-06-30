@@ -1,4 +1,4 @@
-ï»¿using Discord;
+using Discord;
 using Discord.Interactions;
 using System.Threading.Tasks;
 using System.Linq;
@@ -10,51 +10,57 @@ namespace SeagullDiscordBot.Modules
 {
 	public partial class ChangeRoleModule : InteractionModuleBase<SocketInteractionContext>
 	{
-
-	[SlashCommand("change_all_user_role", "ì„œë²„ì˜ ëª¨ë“  ì‚¬ìš©ìì˜ ì—­í• ì„ ë³€ê²½í•©ë‹ˆë‹¤.(ê´€ë¦¬ìì™€ ë´‡ì œì™¸)")]
-	[RequireUserPermission(GuildPermission.Administrator)] // ê´€ë¦¬ì ê¶Œí•œì´ ìˆëŠ” ì‚¬ìš©ìë§Œ ì‚¬ìš© ê°€ëŠ¥
-	public async Task ChangeAllUserRoleCommand(
-		[Summary("role", "ë³€ê²½í•  ì—­í• ì˜ ì´ë¦„")] string role)
-	{
-		// ì—­í• ì´ ì„œë²„ì— ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
-		var targetRole = _roleService.FindExistingRole(Context.Guild, role);
-		if (targetRole == null)
+		[SlashCommand("add_all_user_role", "¼­¹öÀÇ ¸ğµç »ç¿ëÀÚÀÇ ¿ªÇÒÀ» Ãß°¡ÇÕ´Ï´Ù.(°ü¸®ÀÚ¿Í º¿Á¦¿Ü)")]
+		[RequireUserPermission(GuildPermission.Administrator)]
+		public async Task ChangeAllUserRoleCommand([Summary("role", "Ãß°¡ÇÒ ¿ªÇÒÀÇ ÀÌ¸§")] string role)
 		{
-			await RespondAsync($"ì„œë²„ì—ì„œ '{role}' ì—­í• ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. ì—­í•  ì´ë¦„ì„ ì •í™•íˆ ì…ë ¥í•´ì£¼ì„¸ìš”.", ephemeral: true);
-			return;
+			var targetRole = _roleService.FindExistingRole(Context.Guild, role);
+			if (targetRole == null)
+			{
+				await RespondAsync($"¼­¹ö¿¡¼­ '{role}' ¿ªÇÒÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù. ¿ªÇÒ ÀÌ¸§À» Á¤È®È÷ ÀÔ·ÂÇØÁÖ¼¼¿ä.", ephemeral: true);
+				return;
+			}
+
+			var builder = new ComponentBuilder()
+						.WithButton("¸ğµç »ç¿ëÀÚÀÇ ¿ªÇÒ Ãß°¡", $"add_all_user_role_button:{role}", ButtonStyle.Danger);
+
+			await RespondAsync($"¼­¹öÀÇ ¸ğµç »ç¿ëÀÚÀÇ ¿ªÇÒ¿¡ '{role}'À» Ãß°¡ÇÏ°Ú½À´Ï±î?\n¡Ø º¿°ú °ü¸®ÀÚ´Â Á¦¿ÜµË´Ï´Ù.", components: builder.Build(), ephemeral: true);
+			Logger.Print($"'{Context.User.Username}'´ÔÀÌ ¸ğµç »ç¿ëÀÚÀÇ ¿ªÇÒ Ãß°¡¸¦ ¿äÃ»Çß½À´Ï´Ù. ´ë»ó ¿ªÇÒ: '{role}'");
 		}
 
-		var builder = new ComponentBuilder()
-					.WithButton("ëª¨ë“  ì‚¬ìš©ìì˜ ì—­í•  ë³€ê²½", $"change_all_user_role_button:{role}", ButtonStyle.Danger);
-
-		await RespondAsync($"ì„œë²„ì˜ ëª¨ë“  ì‚¬ìš©ìì˜ ì—­í• ì„ '{role}'ìœ¼ë¡œ ë³€ê²½í•˜ê² ìŠµë‹ˆê¹Œ?\nâ€» ë´‡ê³¼ ê´€ë¦¬ìëŠ” ì œì™¸ë©ë‹ˆë‹¤.", components: builder.Build(), ephemeral: true);
-
-		// ë¡œê·¸ ë‚¨ê¸°ê¸°
-		Logger.Print($"'{Context.User.Username}'ë‹˜ì´ ëª¨ë“  ì‚¬ìš©ìì˜ ì—­í•  ë³€ê²½ì„ ìš”ì²­í–ˆìŠµë‹ˆë‹¤. ëŒ€ìƒ ì—­í• : '{role}'");
-		}
-	}
-
-	public partial class ChangeRoleModule : InteractionModuleBase<SocketInteractionContext>
-	{
-		// ì‚¬ìš©ì ì—­í•  ë³€ê²½ ë²„íŠ¼ í´ë¦­ ì‹œ ì‹¤í–‰ë  ë©”ì„œë“œ
-		[ComponentInteraction("change_all_user_role_button:*")]
-		public async Task ChangeAllUserRoleButton(string roleName)
+		[SlashCommand("remove_all_user_role", "¼­¹öÀÇ ¸ğµç »ç¿ëÀÚ¿¡°Ô¼­ ¿ªÇÒÀ» Á¦°ÅÇÕ´Ï´Ù.(°ü¸®ÀÚ¿Í º¿Á¦¿Ü)")]
+		[RequireUserPermission(GuildPermission.Administrator)]
+		public async Task RemoveAllUserRoleCommand([Summary("role", "Á¦°ÅÇÒ ¿ªÇÒÀÇ ÀÌ¸§")] string role)
 		{
-			await RespondAsync("ëª¨ë“  ì‚¬ìš©ìë“¤ì˜ ì—­í• ì„ ë³€ê²½í•©ë‹ˆë‹¤...\nì™„ë£Œ ë©”ì‹œì§€ê°€ ë‚˜íƒ€ë‚ ë•Œê¹Œì§€ ê¸°ë‹¤ë ¤ì£¼ì„¸ìš”.(1ì´ˆë‹¹ 1ëª… ì²˜ë¦¬)", ephemeral: true);
-			// ì‚¬ìš©ì ì—­í•  ë³€ê²½ ê¸°ëŠ¥ êµ¬í˜„
-			Logger.Print($"'{Context.User.Username}'ë‹˜ì´ ì‚¬ìš©ì ì—­í•  ë³€ê²½ ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤.");
+			var targetRole = _roleService.FindExistingRole(Context.Guild, role);
+			if (targetRole == null)
+			{
+				await RespondAsync($"¼­¹ö¿¡¼­ '{role}' ¿ªÇÒÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù. ¿ªÇÒ ÀÌ¸§À» Á¤È®È÷ ÀÔ·ÂÇØÁÖ¼¼¿ä.", ephemeral: true);
+				return;
+			}
+
+			var builder = new ComponentBuilder()
+						.WithButton("¸ğµç »ç¿ëÀÚÀÇ ¿ªÇÒ Á¦°Å", $"remove_all_user_role_button:{role}", ButtonStyle.Danger);
+
+			await RespondAsync($"¼­¹öÀÇ ¸ğµç »ç¿ëÀÚ¿¡°Ô¼­ '{role}' ¿ªÇÒÀ» Á¦°ÅÇÏ°Ú½À´Ï±î?\n¡Ø º¿°ú °ü¸®ÀÚ´Â Á¦¿ÜµË´Ï´Ù.", components: builder.Build(), ephemeral: true);
+			Logger.Print($"'{Context.User.Username}'´ÔÀÌ ¸ğµç »ç¿ëÀÚÀÇ ¿ªÇÒ Á¦°Å¸¦ ¿äÃ»Çß½À´Ï´Ù. ´ë»ó ¿ªÇÒ: '{role}'");
+		}
+
+		[ComponentInteraction("add_all_user_role_button:*")]
+		public async Task AddAllUserRoleButton(string roleName)
+		{
+			await RespondAsync("¸ğµç »ç¿ëÀÚµéÀÇ ¿ªÇÒÀ» Ãß°¡ÇÕ´Ï´Ù...\n¿Ï·á ¸Ş½ÃÁö°¡ ³ªÅ¸³¯¶§±îÁö ±â´Ù·ÁÁÖ¼¼¿ä.(1ÃÊ´ç 1¸í Ã³¸®)", ephemeral: true);
+			Logger.Print($"'{Context.User.Username}'´ÔÀÌ »ç¿ëÀÚ ¿ªÇÒ Ãß°¡ ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù.");
 
 			var guild = Context.Guild;
 			var requestedBy = Context.User.Username;
 
-			// ì„œë²„ì˜ ëª¨ë“  ì‚¬ìš©ì ê°€ì ¸ì˜¤ê¸°
 			await guild.DownloadUsersAsync();
 			var allUsers = guild.Users;
 
-			// ë´‡ ì‚¬ìš©ìì™€ ê´€ë¦¬ì ì œì™¸í•˜ê¸°
 			var targetUsers = allUsers.Where(user => 
-				!user.IsBot && // ë´‡ ì œì™¸
-				!user.GuildPermissions.Administrator // ê´€ë¦¬ì ì œì™¸
+				!user.IsBot && 
+				!user.GuildPermissions.Administrator
 			).ToList();
 
 			int successCount = 0;
@@ -63,64 +69,132 @@ namespace SeagullDiscordBot.Modules
 
 			try
 			{
-				// ìƒˆ ì—­í• ì´ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸í•˜ê³ , ì—†ìœ¼ë©´ ìƒì„±
 				var newRole = _roleService.FindExistingRole(guild, roleName);
 				if (newRole == null)
 				{
-					await FollowupAsync($"{roleName} ì—­í• ì´ ì—†ì–´ ì§„í–‰í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.", ephemeral: true);
+					await FollowupAsync($"{roleName} ¿ªÇÒÀÌ ¾ø¾î ÁøÇàÇÒ ¼ö ¾ø½À´Ï´Ù.", ephemeral: true);
 					return;
 				}
 
-				// ëª¨ë“  ì‚¬ìš©ìì—ê²Œ ì—­í•  ì¶”ê°€ ì§„í–‰
 				int totalUsers = targetUsers.Count;
 				int processedUsers = 0;
 
-				await FollowupAsync($"ì´ {totalUsers}ëª…ì˜ ì‚¬ìš©ìì—ê²Œ ì—­í• ì„ ì¶”ê°€í•©ë‹ˆë‹¤... (ë´‡ ë° ê´€ë¦¬ì {excludedCount}ëª… ì œì™¸)", ephemeral: true);
+				await FollowupAsync($"ÃÑ {totalUsers}¸íÀÇ »ç¿ëÀÚ¿¡°Ô ¿ªÇÒÀ» Ãß°¡ÇÕ´Ï´Ù... (º¿ ¹× °ü¸®ÀÚ {excludedCount}¸í Á¦¿Ü)", ephemeral: true);
 
 				foreach (var user in targetUsers)
 				{
 					processedUsers++;
 
-					// ì‚¬ìš©ìê°€ ì´ë¯¸ ìƒˆ ì—­í• ì„ ê°€ì§€ê³  ìˆëŠ”ì§€ í™•ì¸
 					if (user.Roles.Any(r => r.Id == newRole.Id))
 					{
-						Logger.Print($"ì‚¬ìš©ì '{user.Username}'ì€(ëŠ”) ì´ë¯¸ '{roleName}' ì—­í• ì„ ê°€ì§€ê³  ìˆìŠµë‹ˆë‹¤.");
+						Logger.Print($"»ç¿ëÀÚ '{user.Username}'Àº(´Â) ÀÌ¹Ì '{roleName}' ¿ªÇÒÀ» °¡Áö°í ÀÖ½À´Ï´Ù.");
 						continue;
 					}
 
-					// ì‚¬ìš©ìì—ê²Œ ì—­í•  ì¶”ê°€
 					var result = await _roleService.AddRoleToUserAsync(user, newRole, requestedBy);
 
 					if (result.Success)
 					{
 						successCount++;
-						// ì§„í–‰ ìƒí™© ë¡œê¹… (50ëª…ë§ˆë‹¤ ë¡œê·¸ ì¶œë ¥)
 						if (processedUsers % 50 == 0 || processedUsers == totalUsers)
 						{
-							Logger.Print($"ì—­í•  ì¶”ê°€ ì§„í–‰ ì¤‘: {processedUsers}/{totalUsers} ì™„ë£Œ (ê´€ë¦¬ì ë° ë´‡ {excludedCount}ëª… ì œì™¸)");
-							await FollowupAsync($"ì§„í–‰ ìƒí™©: {processedUsers}/{totalUsers} ì‚¬ìš©ì ì²˜ë¦¬ ì™„ë£Œ", ephemeral: true);
+							Logger.Print($"¿ªÇÒ Ãß°¡ ÁøÇà Áß: {processedUsers}/{totalUsers} ¿Ï·á (°ü¸®ÀÚ ¹× º¿ {excludedCount}¸í Á¦¿Ü)");
+							await FollowupAsync($"ÁøÇà »óÈ²: {processedUsers}/{totalUsers} »ç¿ëÀÚ Ã³¸® ¿Ï·á", ephemeral: true);
 						}
 					}
 					else
 					{
 						errorCount++;
-						Logger.Print($"ì‚¬ìš©ì '{user.Username}'ì—ê²Œ ì—­í•  ì¶”ê°€ ì‹¤íŒ¨: {result.ErrorMessage}", LogType.ERROR);
+						Logger.Print($"»ç¿ëÀÚ '{user.Username}'¿¡°Ô ¿ªÇÒ Ãß°¡ ½ÇÆĞ: {result.ErrorMessage}", LogType.ERROR);
 					}
 
 					await Task.Delay(1000);
 				}
 
-				// ê²°ê³¼ ë©”ì‹œì§€ ì „ì†¡
-				await FollowupAsync($"ì—­í•  ë³€ê²½ ì™„ë£Œ: ì´ {totalUsers}ëª… ì¤‘ {successCount}ëª… ì„±ê³µ, {errorCount}ëª… ì‹¤íŒ¨\n(ê´€ë¦¬ì ë° ë´‡ {excludedCount}ëª… ì œì™¸ë¨)", ephemeral: true);
+				await FollowupAsync($"¿ªÇÒ Ãß°¡ ¿Ï·á: ÃÑ {totalUsers}¸í Áß {successCount}¸í ¼º°ø, {errorCount}¸í ½ÇÆĞ\n(°ü¸®ÀÚ ¹× º¿ {excludedCount}¸í Á¦¿ÜµÊ)", ephemeral: true);
 			}
 			catch (Exception ex)
 			{
-				Logger.Print($"ì‚¬ìš©ì ì—­í•  ë³€ê²½ ì¤‘ ì˜¤ë¥˜ ë°œìƒ: {ex.Message}", LogType.ERROR);
-				await FollowupAsync($"ì—­í•  ë³€ê²½ ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤: {ex.Message}", ephemeral: true);
+				Logger.Print($"»ç¿ëÀÚ ¿ªÇÒ Ãß°¡ Áß ¿À·ù ¹ß»ı: {ex.Message}", LogType.ERROR);
+				await FollowupAsync($"¿ªÇÒ Ãß°¡ Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: {ex.Message}", ephemeral: true);
 			}
 
-			await FollowupAsync("ê¸°ì¡´ ì‚¬ìš©ìë“¤ì˜ ì—­í•  ë³€ê²½ ì™„ë£Œ!", ephemeral: true);
+			await FollowupAsync("±âÁ¸ »ç¿ëÀÚµéÀÇ ¿ªÇÒ Ãß°¡ ¿Ï·á!", ephemeral: true);
+		}
+
+		[ComponentInteraction("remove_all_user_role_button:*")]
+		public async Task RemoveAllUserRoleButton(string roleName)
+		{
+			await RespondAsync("¸ğµç »ç¿ëÀÚµéÀÇ ¿ªÇÒÀ» Á¦°ÅÇÕ´Ï´Ù...\n¿Ï·á ¸Ş½ÃÁö°¡ ³ªÅ¸³¯¶§±îÁö ±â´Ù·ÁÁÖ¼¼¿ä.(1ÃÊ´ç 1¸í Ã³¸®)", ephemeral: true);
+			Logger.Print($"'`{Context.User.Username}'´ÔÀÌ ¸ğµç »ç¿ëÀÚ ¿ªÇÒ Á¦°Å ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù.`");
+
+			var guild = Context.Guild;
+			var requestedBy = Context.User.Username;
+
+			await guild.DownloadUsersAsync();
+			var allUsers = guild.Users;
+
+			var targetUsers = allUsers.Where(user =>
+				!user.IsBot &&
+				!user.GuildPermissions.Administrator
+			).ToList();
+
+			int successCount = 0;
+			int errorCount = 0;
+			int excludedCount = allUsers.Count - targetUsers.Count;
+			try
+			{
+				var targetRole = _roleService.FindExistingRole(guild, roleName);
+				if (targetRole == null)
+				{
+					await FollowupAsync($"{roleName} ¿ªÇÒÀÌ ¾ø¾î ÁøÇàÇÒ ¼ö ¾ø½À´Ï´Ù.`", ephemeral: true);
+					return;
+				}
+
+				var usersWithRole = targetUsers.Where(user => user.Roles.Any(r => r.Id == targetRole.Id)).ToList();
+				int totalUsers = usersWithRole.Count;
+				int processedUsers = 0;
+
+				if (totalUsers == 0)
+				{
+					await FollowupAsync($"'{roleName}' ¿ªÇÒÀ» °¡Áø »ç¿ëÀÚ°¡ ¾ø½À´Ï´Ù. (º¿ ¹× °ü¸®ÀÚ {excludedCount}¸í Á¦¿Ü)`", ephemeral: true);
+					return;
+				}
+
+				await FollowupAsync($"ÃÑ {totalUsers}¸íÀÇ »ç¿ëÀÚ¿¡°Ô¼­ ¿ªÇÒÀ» Á¦°ÅÇÕ´Ï´Ù... (º¿ ¹× °ü¸®ÀÚ {excludedCount}¸í Á¦¿Ü)`", ephemeral: true);
+
+				foreach (var user in usersWithRole)
+				{
+					processedUsers++;
+
+					var result = await _roleService.RemoveRoleFromUserAsync(user, targetRole, requestedBy);
+					if (result.Success)
+					{
+						successCount++;
+						if (processedUsers % 50 == 0 || processedUsers == totalUsers)
+						{
+							Logger.Print($"¿ªÇÒ Á¦°Å ÁøÇà Áß: {processedUsers}/{totalUsers} ¿Ï·á (°ü¸®ÀÚ ¹× º¿ {excludedCount}¸í Á¦¿Ü)`");
+							await FollowupAsync($"ÁøÇà »óÈ²: {processedUsers}/{totalUsers} »ç¿ëÀÚ Ã³¸® ¿Ï·á`", ephemeral: true);
+						}
+					}
+					else
+					{
+						errorCount++;
+						Logger.Print($"»ç¿ëÀÚ '{user.Username}'¿¡°Ô¼­ ¿ªÇÒ Á¦°Å ½ÇÆĞ: {result.ErrorMessage}`", LogType.ERROR);
+					}
+
+					await Task.Delay(1000);
+				}
+
+				await FollowupAsync($"¿ªÇÒ Á¦°Å ¿Ï·á: ÃÑ {totalUsers}¸í Áß {successCount}¸í ¼º°ø, {errorCount}¸í ½ÇÆĞ\n(°ü¸®ÀÚ ¹× º¿ {excludedCount}¸í Á¦¿ÜµÊ)`", ephemeral: true);
+			}
+			catch (Exception ex)
+			{
+				Logger.Print($"»ç¿ëÀÚ ¿ªÇÒ Á¦°Å Áß ¿À·ù ¹ß»ı: {ex.Message}`", LogType.ERROR);
+				await FollowupAsync($"¿ªÇÒ Á¦°Å Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: {ex.Message}`", ephemeral: true);
+			}
+
+			await FollowupAsync("¸ğµç »ç¿ëÀÚµéÀÇ ¿ªÇÒ Á¦°Å ¿Ï·á!", ephemeral: true);
 		}
 	}
 }
-

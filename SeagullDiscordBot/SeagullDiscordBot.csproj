@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-<Version>1.0.2507.9</Version>
+<Version>1.0.2507.10</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,9 +36,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)BuildVersionUpdater.exe $(SolutionDir)\SeagullDiscordBot\SeagullDiscordBot.csproj $(SolutionDir)\BuildVersion.txt"
-        ContinueOnError="false"
-        WorkingDirectory="$(MSBuildProjectDirectory)\.." />
+    <Exec Command="$(SolutionDir)Build/BuildVersionUpdater.exe $(SolutionDir)\SeagullDiscordBot\SeagullDiscordBot.csproj $(SolutionDir)\BuildVersion.txt" ContinueOnError="false" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
   </Target>
 
 </Project>

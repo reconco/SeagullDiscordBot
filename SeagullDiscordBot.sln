@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197 d17.13
+VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeagullDiscordBot", "SeagullDiscordBot\SeagullDiscordBot.csproj", "{7042C940-B742-473D-AD62-C30AC466C20B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildVersionUpdater", "BuildVersionUpdater\BuildVersionUpdater.csproj", "{E96E01CE-8780-CECA-0108-D8D6B99DB9BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{7042C940-B742-473D-AD62-C30AC466C20B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7042C940-B742-473D-AD62-C30AC466C20B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7042C940-B742-473D-AD62-C30AC466C20B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E96E01CE-8780-CECA-0108-D8D6B99DB9BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E96E01CE-8780-CECA-0108-D8D6B99DB9BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E96E01CE-8780-CECA-0108-D8D6B99DB9BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E96E01CE-8780-CECA-0108-D8D6B99DB9BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

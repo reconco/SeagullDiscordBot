@@ -60,6 +60,10 @@ namespace SeagullDiscordBot
 						ClearCommands();
 						break;
 
+					case "version":
+					Logger.Print($"SeagullDiscordBot Version: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}");
+						break;
+
 					case "quit":
 					case "exit":
 						return;

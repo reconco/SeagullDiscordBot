@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace SeagullDiscordBot.Modules
 {
@@ -21,6 +22,17 @@ namespace SeagullDiscordBot.Modules
 			{
 				Logger.Print(list[i].DisplayName);
 			}
+		}
+
+		[SlashCommand("bot_info", "봇 정보 받기.")]
+		public async Task BotInfoCommand()
+		{
+			await RespondAsync("갈매기 봇!", ephemeral: true);
+			string botInfo = 
+				$"갈매기 봇 정보\n" +
+				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}";
+
+			Logger.Print($"'{Context.User.Username}'사용자가 봇 정보를 요청");
 		}
 	}
 }

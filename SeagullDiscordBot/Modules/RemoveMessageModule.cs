@@ -8,7 +8,7 @@ namespace SeagullDiscordBot.Modules
 	public class RemoveMessageModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		// 기본 슬래시 명령어 정의
-		[SlashCommand("remove_user_messages", "현재 채널에 있는 특정 사용자의 모든 메시지를 삭제합니다.")]
+		[SlashCommand("remove_user_messages", "현재 채널에 있는 특정 사용자의 14일 이내의 모든 메시지를 삭제합니다.")]
 		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
 		public async Task RemoveUserMessagesCommand([Summary(description: "메시지를 삭제할 사용자의 이름")] string username)
 		{
@@ -116,7 +116,7 @@ namespace SeagullDiscordBot.Modules
 
 
 		// 사용자 ID로 메시지 삭제하는 명령어 추가
-		[SlashCommand("remove_messages_by_id_number", "사용자 ID번호로 현재 채널에 있는 특정 사용자의 모든 메시지를 삭제합니다.")]
+		[SlashCommand("remove_messages_by_id_number", "사용자 ID번호로 현재 채널에 있는 특정 사용자의 14일 이내의 모든 메시지를 삭제합니다.")]
 		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
 		public async Task RemoveUserMessagesByIdCommand([Summary(description: "메시지를 삭제할 사용자의 ID")] string userId)
 		{
@@ -176,6 +176,9 @@ namespace SeagullDiscordBot.Modules
 				bool hasMoreMessages = true;
 				ulong? lastMessageId = null;
 
+				// 14일 기준 시점 계산 (한 번만 계산하여 성능 개선)
+				var fourteenDaysAgo = DateTimeOffset.UtcNow.AddDays(-14);
+
 				// 메시지 삭제 작업 시작
 				while (hasMoreMessages)
 				{
@@ -204,11 +207,11 @@ namespace SeagullDiscordBot.Modules
 						{
 							// 14일 이내의 메시지만 일괄 삭제 가능 (Discord API 제한)
 							var recentMessages = userMessages
-								.Where(msg => (DateTimeOffset.UtcNow - msg.Timestamp).TotalDays < 14)
+								.Where(msg => msg.Timestamp >= fourteenDaysAgo)
 								.ToList();
 
 							var oldMessages = userMessages
-								.Where(msg => (DateTimeOffset.UtcNow - msg.Timestamp).TotalDays >= 14)
+								.Where(msg => msg.Timestamp < fourteenDaysAgo)
 								.ToList();
 
 							// 최근 메시지(14일 이내) 일괄 삭제
@@ -218,25 +221,28 @@ namespace SeagullDiscordBot.Modules
 								deletedCount += recentMessages.Count;
 
 								// 너무 빠른 요청으로 인한 API 제한 방지를 위한 딜레이
-								await Task.Delay(1000);
+								//await Task.Delay(1000);
 							}
+
+							if (oldMessages.Count > 0)
+								break;
 
 							// 오래된 메시지(14일 이상) 개별 삭제
-							foreach (var message in oldMessages)
-							{
-								try
-								{
-									await message.DeleteAsync();
-									deletedCount++;
+							//foreach (var message in oldMessages)
+							//{
+							//	try
+							//	{
+							//		await message.DeleteAsync();
+							//		deletedCount++;
 
-									// 너무 빠른 요청으로 인한 API 제한 방지를 위한 딜레이
-									await Task.Delay(1000);
-								}
-								catch (Exception ex)
-								{
-									Logger.Print($"메시지 삭제 중 오류 발생: {ex.Message}", LogType.ERROR);
-								}
-							}
+							//		// 너무 빠른 요청으로 인한 API 제한 방지를 위한 딜레이
+							//		await Task.Delay(1000);
+							//	}
+							//	catch (Exception ex)
+							//	{
+							//		Logger.Print($"메시지 삭제 중 오류 발생: {ex.Message}", LogType.ERROR);
+							//	}
+							//}
 						}
 
 						// 메시지가 적거나 1000개 이상 체크했으면 진행 상황 업데이트

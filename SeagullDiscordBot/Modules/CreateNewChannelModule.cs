@@ -65,7 +65,7 @@ namespace SeagullDiscordBot.Modules
 				await FollowupAsync($"채널 생성 중 오류가 발생했습니다: {result.ErrorMessage}", ephemeral: true);
 			}
 
-			await FollowupAsync($"'{channelName}'채널 생성 완료!");
+			await FollowupAsync($"'{channelName}'채널 생성 완료!", ephemeral: true);
 
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 '{channelName}'채널을 생성였습니다.");
@@ -116,7 +116,7 @@ namespace SeagullDiscordBot.Modules
 				await FollowupAsync($"채널 생성 중 오류가 발생했습니다: {result.ErrorMessage}", ephemeral: true);
 			}
 
-			await FollowupAsync($"'{channelName}'채널 생성 완료!");
+			await FollowupAsync($"'{channelName}'채널 생성 완료!", ephemeral: true);
 
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 '{channelName}'채널을 생성였습니다.");

@@ -12,7 +12,6 @@ namespace SeagullDiscordBot.Modules
 		public DateTime NextMessageTime { get; set; } = new DateTime(); // 다음 반복 메시지 가능 시간
 	}
 
-	// 메시지 에코 기능을 담당하는 모듈
 	public class SpamModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		private static int _spamMessageCooldownTime = 0; // 반복 메시지 쿨다운 시간 (초 단위)
@@ -89,7 +88,7 @@ namespace SeagullDiscordBot.Modules
 							{
 								// 유사한 메시지 감지 - 쿨다운 연장
 								existingInfo.NextMessageTime = nextCooldownTime;
-								
+
 								// 비동기 작업을 위해 Task.Run 사용
 								_ = Task.Run(async () => await HandleSpamDetected(message, similarity));
 								
@@ -116,6 +115,8 @@ namespace SeagullDiscordBot.Modules
 		{
 			try
 			{
+				await message.DeleteAsync();
+
 				// 사용자에게 경고 메시지 전송
 				Embed embed = new EmbedBuilder()
 					.WithTitle("도배 방지 처리된 메시지")

@@ -14,7 +14,6 @@ namespace SeagullDiscordBot.Modules
 
 	public class SpamModule : InteractionModuleBase<SocketInteractionContext>
 	{
-		private static int _spamMessageCooldownTime = 0; // 반복 메시지 쿨다운 시간 (초 단위)
 		private static float _jaccardSimilarityThreshold = 0.85f; // Jaccard 유사도 임계값 (0.0 ~ 1.0)
 		private static readonly ConcurrentDictionary<ulong, MessageInfo> _spamMessageCooldowns = new ConcurrentDictionary<ulong, MessageInfo>();
 
@@ -22,35 +21,49 @@ namespace SeagullDiscordBot.Modules
 		private static DateTime _lastCleanupTime = DateTime.MinValue;
 		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(60); // 60분마다 정리
 
+		private static int SpamMessageCooldownTime
+		{
+			get => Config.Settings.SpamDetectionInterval;
+			set
+			{
+				if (value < 0)
+					Config.Settings.SpamDetectionInterval = 0;
+				else
+					Config.Settings.SpamDetectionInterval = value;
+			}
+		}
+
 		[SlashCommand("set_spam_message_cooldown_time", "반복 메시지 쿨다운 시간을 정합니다(0초 설정시 Off)")]
 		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
 		public async Task SetSpamMessageCooldownTime(
 			[Summary("time", "도배 방지 시간(초)")] int time)
 		{
-			_spamMessageCooldownTime = time;
+			SpamMessageCooldownTime = time;
 
-			await RespondAsync($"반복 메시지 쿨다운 시간이 {_spamMessageCooldownTime}초로 지정 되었습니다.", ephemeral: true);
+			await RespondAsync($"반복 메시지 쿨다운 시간이 {SpamMessageCooldownTime}초로 지정 되었습니다.", ephemeral: true);
 
 			// 로그 남기기
-			Logger.Print($"'{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {_spamMessageCooldownTime}초로 지정하였습니다.");
+			Logger.Print($"'{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {SpamMessageCooldownTime}초로 지정하였습니다.");
+
+			Config.SaveSettings(); // 설정 저장
 		}
 
 		[SlashCommand("get_spam_message_cooldown_time", "반복 메시지 쿨다운 시간을 확인합니다")]
 		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
 		public async Task GetSpamMessageCooldownTime()
 		{
-			if (_spamMessageCooldownTime < 0)
+			if (SpamMessageCooldownTime < 0)
 			{
 				await RespondAsync("반복 메시지 쿨다운 시간이 설정되어 있지 않습니다(0초).", ephemeral: true);
 				return;
 			}
 			else
 			{
-				await RespondAsync($"현재 반복 메시지 쿨다운 시간은 {_spamMessageCooldownTime}초입니다.", ephemeral: true);
+				await RespondAsync($"현재 반복 메시지 쿨다운 시간은 {SpamMessageCooldownTime}초입니다.", ephemeral: true);
 			}
 
 			// 로그 남기기
-			Logger.Print($"'{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {_spamMessageCooldownTime}초인 것을 확인하였습니다.");
+			Logger.Print($"'{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {SpamMessageCooldownTime}초인 것을 확인하였습니다.");
 		}
 
 		// 메시지 받았을 때 처리하는 정적 메서드
@@ -62,7 +75,7 @@ namespace SeagullDiscordBot.Modules
 			var userId = message.Author.Id;
 			var messageContent = message.Content;
 			var currentTime = DateTime.Now;
-			var nextCooldownTime = currentTime.AddSeconds(_spamMessageCooldownTime);
+			var nextCooldownTime = currentTime.AddSeconds(SpamMessageCooldownTime);
 
 			// 사용자의 메시지 정보 가져오기 또는 생성
 			var messageInfo = _spamMessageCooldowns.AddOrUpdate(
@@ -204,7 +217,7 @@ namespace SeagullDiscordBot.Modules
 		private static bool ShouldProcessMessage(SocketMessage message)
 		{
 			// 쿨다운 시간이 설정되어 있지 않으면 아무 작업도 하지 않음
-			if (_spamMessageCooldownTime <= 0)
+			if (SpamMessageCooldownTime <= 0)
 				return false; 
 
 			// 봇 메시지는 무시

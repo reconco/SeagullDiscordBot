@@ -40,6 +40,8 @@ namespace SeagullDiscordBot
 
 		public async Task InitializeAsync()
 		{
+			Config.LoadSettings();
+
 			// 토큰 설정 및 로그인
 			string token = Config.GetToken();
 			if (string.IsNullOrEmpty(token))

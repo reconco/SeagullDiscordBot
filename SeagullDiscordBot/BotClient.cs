@@ -21,7 +21,7 @@ namespace SeagullDiscordBot
 			{
 				MessageCacheSize = 100,
 				GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers
-				| GatewayIntents.GuildPresences | GatewayIntents.MessageContent
+				| GatewayIntents.GuildPresences | GatewayIntents.MessageContent | GatewayIntents.All
 
 				//권한이 필요한 인텐트
 				//GatewayIntents.GuildMembers: 서버 멤버 관련 이벤트

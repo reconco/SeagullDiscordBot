@@ -5,22 +5,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-<Version>1.0.2507.41</Version>
+<Version>1.0.2507.86</Version>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Modules\Legacy\FirstSettingModule.AddRoleButton.cs" />
-    <Compile Remove="Modules\Legacy\FirstSettingModule.AddRuleChannelButton.cs" />
-    <Compile Remove="Modules\Legacy\FirstSettingModule.ChangeRoleAllUserButton.cs" />
-    <Compile Remove="Modules\Legacy\FirstSettingModule.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Modules\Legacy\FirstSettingModule.AddRoleButton.cs" />
-    <None Include="Modules\Legacy\FirstSettingModule.AddRuleChannelButton.cs" />
-    <None Include="Modules\Legacy\FirstSettingModule.ChangeRoleAllUserButton.cs" />
-    <None Include="Modules\Legacy\FirstSettingModule.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.17.4" />
@@ -33,6 +19,10 @@
     <None Update="tokenForDevBot.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Modules\Legacy\" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(SKIP_VERSION_UPDATE)' != 'true'">

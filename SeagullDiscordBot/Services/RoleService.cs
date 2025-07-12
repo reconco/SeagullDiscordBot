@@ -116,7 +116,7 @@ namespace SeagullDiscordBot.Services
 
 					return RoleResult.Successful(
 						existingRole,
-						$"역할 '{existingRole.Name}'이(가) 이미 존재합니다."
+						$"역할 '{existingRole.Name}'이(가) 이미 존재합니다. 이 역할을 사용하겠습니다."
 					);
 				}
 

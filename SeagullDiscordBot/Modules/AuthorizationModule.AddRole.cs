@@ -6,13 +6,13 @@ using SeagullDiscordBot.Services;
 
 namespace SeagullDiscordBot.Modules
 {
-	public partial class FirstSettingModule : InteractionModuleBase<SocketInteractionContext>
+	public partial class AuthorizationModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		const string RoleName = "갈매기";
 		private readonly RoleService _roleService;
 
 		// 생성자를 통해 RoleService 초기화
-		public FirstSettingModule()
+		public AuthorizationModule()
 		{
 			_roleService = new RoleService();
 		}
@@ -30,7 +30,7 @@ namespace SeagullDiscordBot.Modules
 			try
 			{
 				// RoleService를 사용하여 역할 생성 (결과 객체 반환)
-				var result = await _roleService.CreateRoleWithResultAsync(
+				RoleResult result = await _roleService.CreateRoleWithResultAsync(
 					guild,
 					RoleName,
 					Context.User.Username,
@@ -40,16 +40,19 @@ namespace SeagullDiscordBot.Modules
 					true
 				);
 
-				if (result.Success)
+				if (!result.Success)
 				{
-					// 성공 메시지 전송
-					await FollowupAsync(result.Message, ephemeral: true);
-				}
-				else
-				{
-					// 오류 발생 시 처리
 					await FollowupAsync($"역할 추가 중 오류가 발생했습니다: {result.ErrorMessage}", ephemeral: true);
 				}
+
+				// 성공 메시지 전송
+				await FollowupAsync(result.Message, ephemeral: true);
+
+				ulong roleId = result.Role.Id;
+				Config.Settings.AutoRoleId = roleId;
+				Config.SaveSettings();
+
+
 			}
 			catch (Exception ex)
 			{

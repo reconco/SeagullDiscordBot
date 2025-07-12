@@ -10,7 +10,7 @@ namespace SeagullDiscordBot.Modules
 {
 	public partial class ChangeRoleModule : InteractionModuleBase<SocketInteractionContext>
 	{
-		[SlashCommand("add_all_user_role", "서버의 모든 사용자의 역할을 추가합니다.(관리자와 봇제외)")]
+		[SlashCommand("add_all_user_role", "서버의 모든 사용자에게 역할을 추가합니다.(관리자와 봇제외)")]
 		[RequireUserPermission(GuildPermission.Administrator)]
 		public async Task ChangeAllUserRoleCommand([Summary("role", "추가할 역할의 이름")] string role)
 		{
@@ -24,7 +24,7 @@ namespace SeagullDiscordBot.Modules
 			var builder = new ComponentBuilder()
 						.WithButton("모든 사용자의 역할 추가", $"add_all_user_role_button:{role}", ButtonStyle.Danger);
 
-			await RespondAsync($"서버의 모든 사용자의 역할에 '{role}'을 추가하겠습니까?\n※ 봇과 관리자는 제외됩니다.", components: builder.Build(), ephemeral: true);
+			await RespondAsync($"서버의 모든 사용자에게 역할 '{role}'을 추가하겠습니까?\n※ 봇과 관리자는 제외됩니다.", components: builder.Build(), ephemeral: true);
 			Logger.Print($"'{Context.User.Username}'님이 모든 사용자의 역할 추가를 요청했습니다. 대상 역할: '{role}'");
 		}
 
@@ -49,7 +49,7 @@ namespace SeagullDiscordBot.Modules
 		[ComponentInteraction("add_all_user_role_button:*")]
 		public async Task AddAllUserRoleButton(string roleName)
 		{
-			await RespondAsync("모든 사용자들의 역할을 추가합니다...\n완료 메시지가 나타날때까지 기다려주세요.(1초당 1명 처리)", ephemeral: true);
+			await RespondAsync("모든 사용자들에게 역할을 추가합니다...\n완료 메시지가 나타날때까지 기다려주세요.(1초당 1명 처리)", ephemeral: true);
 			Logger.Print($"'{Context.User.Username}'님이 사용자 역할 추가 버튼을 클릭했습니다.");
 
 			var guild = Context.Guild;
@@ -125,7 +125,7 @@ namespace SeagullDiscordBot.Modules
 		[ComponentInteraction("remove_all_user_role_button:*")]
 		public async Task RemoveAllUserRoleButton(string roleName)
 		{
-			await RespondAsync("모든 사용자들의 역할을 제거합니다...\n완료 메시지가 나타날때까지 기다려주세요.(1초당 1명 처리)", ephemeral: true);
+			await RespondAsync("모든 사용자들에서 역할을 제거합니다...\n완료 메시지가 나타날때까지 기다려주세요.(1초당 1명 처리)", ephemeral: true);
 			Logger.Print($"'`{Context.User.Username}'님이 모든 사용자 역할 제거 버튼을 클릭했습니다.`");
 
 			var guild = Context.Guild;
@@ -194,7 +194,7 @@ namespace SeagullDiscordBot.Modules
 				await FollowupAsync($"역할 제거 중 오류가 발생했습니다: {ex.Message}`", ephemeral: true);
 			}
 
-			await FollowupAsync("모든 사용자들의 역할 제거 완료!", ephemeral: true);
+			await FollowupAsync($"모든 사용자들의 {roleName} 역할 제거 완료!", ephemeral: true);
 		}
 	}
 }

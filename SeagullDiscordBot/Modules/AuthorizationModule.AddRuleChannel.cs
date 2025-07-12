@@ -6,7 +6,7 @@ using SeagullDiscordBot.Services;
 
 namespace SeagullDiscordBot.Modules
 {
-	public partial class FirstSettingModule : InteractionModuleBase<SocketInteractionContext>
+	public partial class AuthorizationModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		// 규칙 채널 추가 버튼 클릭 시 실행될 메서드
 		[ComponentInteraction("add_rule_channel_button")]
@@ -27,6 +27,51 @@ namespace SeagullDiscordBot.Modules
 
 			if (result.Success)
 			{
+				// everyone 역할에 대해 대부분의 권한을 거부하여 읽기만 가능하게 설정
+				var restrictedPermissions = new OverwritePermissions(
+				sendMessages: PermValue.Deny,         // 메시지 전송 거부
+				sendTTSMessages: PermValue.Deny,      // TTS 메시지 거부
+				embedLinks: PermValue.Deny,           // 링크 임베드 거부
+				attachFiles: PermValue.Deny,          // 파일 첨부 거부
+				mentionEveryone: PermValue.Deny,      // @everyone 멘션 거부
+				useExternalEmojis: PermValue.Deny,    // 외부 이모지 사용 거부
+				useExternalStickers: PermValue.Deny,  // 외부 스티커 사용 거부
+				addReactions: PermValue.Deny,         // 반응 추가 거부
+				sendMessagesInThreads: PermValue.Deny, // 쓰레드 메시지 전송 거부
+				createPublicThreads: PermValue.Deny,  // 공개 쓰레드 생성 거부
+				createPrivateThreads: PermValue.Deny // 비공개 쓰레드 생성 거부
+				);
+
+				var botPermissions = new OverwritePermissions(
+				sendMessages: PermValue.Allow,         // 메시지 전송 거부
+				//sendTTSMessages: PermValue.Deny      // TTS 메시지 거부
+				embedLinks: PermValue.Allow,           // 링크 임베드 거부
+				attachFiles: PermValue.Allow,          // 파일 첨부 거부
+				mentionEveryone: PermValue.Allow,      // @everyone 멘션 거부
+				useExternalEmojis: PermValue.Allow,    // 외부 이모지 사용 거부
+				useExternalStickers: PermValue.Allow,  // 외부 스티커 사용 거부
+				addReactions: PermValue.Allow,         // 반응 추가 거부
+				sendMessagesInThreads: PermValue.Allow, // 쓰레드 메시지 전송 거부
+				createPublicThreads: PermValue.Allow,  // 공개 쓰레드 생성 거부
+				createPrivateThreads: PermValue.Allow // 비공개 쓰레드 생성 거부
+				);
+
+
+				try
+				{
+					var everyoneRole = Context.Guild.EveryoneRole;
+					await result.Channel.AddPermissionOverwriteAsync(everyoneRole, restrictedPermissions);
+
+					var botRole = Context.Guild.Roles.FirstOrDefault(r => r.Name == "갈매기봇");
+					await result.Channel.AddPermissionOverwriteAsync(botRole, botPermissions);
+				}
+				catch (Exception ex)
+				{
+					Logger.Print($"채널 권한 설정 중 오류 발생: {ex.Message}", LogType.ERROR);
+					await FollowupAsync($"채널 권한 설정 중 오류가 발생했습니다: {ex.Message}", ephemeral: true);
+					return;
+				}
+
 				// 성공 메시지 전송
 				await FollowupAsync(result.Message, ephemeral: true);
 
@@ -36,10 +81,10 @@ namespace SeagullDiscordBot.Modules
 				var embed = new EmbedBuilder()
 					.WithColor(Color.Blue)
 					.WithTitle("📜 서버 규칙 안내")
-					.WithDescription("이 채널은 서버 규칙을 안내하고 사용자 인증을 위한 채널입니다.\n아래 규칙을 확인하고 인증 버튼을 눌러주세요.")
+					.WithDescription("이 채널은 서버 규칙을 안내하고 사용자 인증을 위한 채널입니다.\n아래 규칙을 확인해주세요.")
 					.AddField("1", "문의 채널에 잡담 금지")
 					.AddField("2", "문의 답변에 말로 대답하지 말고 이모지 사용")
-					.WithFooter(footer => footer.Text = "위 내용에 동의하면 밑의 빨간색 버튼을 눌러주세요. 인증 후에 다른 채널들을 이용할 수 있습니다.")
+					.WithFooter(footer => footer.Text = "인증 후에 메시지 보내기 권한이 활성화 됩니다. 밑에 '인증하기' 버튼을 눌러주세요.")
 					.WithCurrentTimestamp()
 					.Build();
 

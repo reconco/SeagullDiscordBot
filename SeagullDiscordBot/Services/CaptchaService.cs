@@ -64,7 +64,8 @@ namespace SeagullDiscordBot.Services
 				return new CaptchaVerificationResult
 				{
 					IsSuccess = false,
-					Message = "진행 중인 인증이 없습니다. 다시 인증 버튼을 눌러주세요."
+					Message = "진행 중인 인증이 없습니다. 다시 인증 버튼을 눌러주세요.",
+					Retry = false
 				};
 			}
 
@@ -75,20 +76,22 @@ namespace SeagullDiscordBot.Services
 				return new CaptchaVerificationResult
 				{
 					IsSuccess = false,
-					Message = "인증 시간이 초과되었습니다. 다시 인증 버튼을 눌러주세요."
+					Message = "인증 시간이 초과되었습니다. 다시 인증 버튼을 눌러주세요.",
+					Retry = false
 				};
 			}
 
 			captchaData.AttemptCount++;
 
 			// 최대 시도 횟수 확인 (3회)
-			if (captchaData.AttemptCount > 3)
+			if (captchaData.AttemptCount >= 3)
 			{
 				_pendingCaptchas.Remove(userId);
 				return new CaptchaVerificationResult
 				{
 					IsSuccess = false,
-					Message = "최대 시도 횟수를 초과했습니다. 다시 인증 버튼을 눌러주세요."
+					Message = "최대 시도 횟수를 초과했습니다. 다시 인증 버튼을 눌러주세요.",
+					Retry = false
 				};
 			}
 
@@ -99,7 +102,8 @@ namespace SeagullDiscordBot.Services
 				return new CaptchaVerificationResult
 				{
 					IsSuccess = true,
-					Message = "인증에 성공했습니다!"
+					Message = "인증에 성공했습니다!",
+					Retry = false
 				};
 			}
 
@@ -107,7 +111,8 @@ namespace SeagullDiscordBot.Services
 			{
 				IsSuccess = false,
 				Message = $"틀렸습니다. ({captchaData.AttemptCount}/3) 다시 시도해주세요.",
-				RetryImageData = captchaData.ImageData
+				Retry = true
+				//RetryImageData = captchaData.ImageData
 			};
 		}
 
@@ -313,6 +318,8 @@ namespace SeagullDiscordBot.Services
 	{
 		public bool IsSuccess { get; set; }
 		public string Message { get; set; }
-		public byte[] RetryImageData { get; set; }
+
+		public bool Retry { get; set; }
+		//public byte[] RetryImageData { get; set; }
 	}
 }

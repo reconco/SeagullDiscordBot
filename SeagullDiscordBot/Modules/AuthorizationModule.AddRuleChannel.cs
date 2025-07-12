@@ -120,13 +120,28 @@ namespace SeagullDiscordBot.Modules
 		[ComponentInteraction("verify_user_button")]
 		public async Task VerifyUserButton()
 		{
-			Logger.Print($"'{Context.User.Username}'님이 인증 버튼을 클릭했습니다.");
+			Logger.Print($"'{Context.User.Username}'님이 캡챠 인증을 시작했습니다.");
 
 			try
 			{
+				// Config.Settings.AutoRoleId가 설정되어 있는지 확인
+				if (Config.Settings.AutoRoleId == null)
+				{
+					await RespondAsync("갈매기 역할이 설정되지 않았습니다. 관리자에게 문의하세요.", ephemeral: true);
+					return;
+				}
+
 				// 사용자가 이미 갈매기 역할을 가지고 있는지 확인
-				var seagullRole = _roleService.FindExistingRole(Context.Guild, "갈매기");
-				if (seagullRole != null && Context.User is SocketGuildUser guildUser && guildUser.Roles.Any(r => r.Id == seagullRole.Id))
+				var guildUser = Context.User as SocketGuildUser;
+				if (guildUser == null)
+				{
+					await RespondAsync("사용자 정보를 가져올 수 없습니다.", ephemeral: true);
+					return;
+				}
+
+				// 사용자가 이미 갈매기 역할을 가지고 있는지 확인
+				var userSeagullRole = guildUser.Roles.FirstOrDefault(r => r.Id == Config.Settings.AutoRoleId);
+				if (userSeagullRole != null)  // ✅ 역할이 있으면
 				{
 					await RespondAsync("이미 인증된 사용자입니다.", ephemeral: true);
 					return;
@@ -233,17 +248,23 @@ namespace SeagullDiscordBot.Modules
 						.WithDescription(verificationResult.Message)
 						.WithCurrentTimestamp();
 
-					// 재시도 가능한 경우 새로운 캡차 이미지 표시
-					if (verificationResult.RetryImageData != null)
+					//// 재시도 가능한 경우 새로운 캡차 이미지 표시
+					//if (verificationResult.RetryImageData != null)
+					//{
+					//	failEmbed.WithImageUrl("attachment://captcha_retry.jpg");
+					//	failEmbed.WithDescription($"{verificationResult.Message}\n\n**다시 시도해주세요.**");
+
+					//	var retryButton = new ComponentBuilder()
+					//		.WithButton("다시 입력", "captcha_input_button", ButtonStyle.Primary, emote: new Emoji("🔄"));
+
+					//	using var stream = new MemoryStream(verificationResult.RetryImageData);
+					//	await FollowupWithFileAsync(stream, "captcha_retry.jpg", embed: failEmbed.Build(), components: retryButton.Build(), ephemeral: true);
+					//}
+
+					if (verificationResult.Retry)
 					{
-						failEmbed.WithImageUrl("attachment://captcha_retry.jpg");
-						failEmbed.WithDescription($"{verificationResult.Message}\n\n**새로운 캡차 이미지입니다. 다시 시도해주세요.**");
-
-						var retryButton = new ComponentBuilder()
-							.WithButton("다시 입력", "captcha_input_button", ButtonStyle.Primary, emote: new Emoji("🔄"));
-
-						using var stream = new MemoryStream(verificationResult.RetryImageData);
-						await FollowupWithFileAsync(stream, "captcha_retry.jpg", embed: failEmbed.Build(), components: retryButton.Build(), ephemeral: true);
+						failEmbed.WithDescription(verificationResult.Message);
+						await FollowupAsync(embed: failEmbed.Build(), ephemeral: true);
 					}
 					else
 					{

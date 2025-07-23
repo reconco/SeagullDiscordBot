@@ -19,9 +19,18 @@ namespace SeagullDiscordBot.Modules
 
 				var settings = Config.Settings;
 
-				embed.AddField("🎭 자동 역할 부여", settings.AutoRoleEnabled ? "✅" : "❌", true);
-				embed.AddField("🏷️ 자동 역할 ID", settings.AutoRoleId?.ToString() ?? "설정되지 않음", true);
-				embed.AddField("⏱️ 도배 감지 간격 (초)", settings.SpamDetectionInterval.ToString(), true);
+				string authRoleName = settings.AutoRoleId.HasValue 
+					? Context.Guild.GetRole(settings.AutoRoleId.Value)?.Name ?? "" 
+					: "";
+
+				string authChannelName = settings.AuthChannelId.HasValue 
+					? Context.Guild.GetTextChannel(settings.AuthChannelId.Value)?.Name ?? "" 
+					: "";
+
+				embed.AddField("🎭 자동 역할 부여", settings.AutoRoleEnabled ? "✅" : "❌");
+				embed.AddField("🏷️ 자동 역할 ID", $"{authRoleName}({settings.AutoRoleId?.ToString()})" ?? "❌");
+				embed.AddField("🏷️ 자동 역할 부여 채널", $"{authChannelName}({settings.AuthChannelId?.ToString()})" ?? "❌");
+				embed.AddField("⏱️ 도배 감지 간격 (초)", settings.SpamDetectionInterval.ToString());
 
 				await RespondAsync(embed: embed.Build(), ephemeral: true);
 				Logger.Print($"'{Context.User.Username}'님이 봇 설정을 조회했습니다.");

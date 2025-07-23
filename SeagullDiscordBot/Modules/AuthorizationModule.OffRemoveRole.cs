@@ -49,7 +49,6 @@ namespace SeagullDiscordBot.Modules
 
 				// Config에서 AutoRoleId 초기화
 				Config.Settings.AutoRoleId = null;
-				Config.Settings.AutoRoleEnabled = false;
 				Config.SaveSettings();
 
 				await FollowupAsync($"'{roleName}' 역할이 성공적으로 삭제되었습니다.", ephemeral: true);

@@ -10,7 +10,16 @@ namespace SeagullDiscordBot
         /// <summary>
         /// 자동 역할 부여 여부
         /// </summary>
-        public bool AutoRoleEnabled { get; set; } = false;
+        public bool AutoRoleEnabled
+        {
+            get
+            {
+                if(AutoRoleId != null && AuthChannelId != null)
+                    return true;
+                else
+                    return false;
+			}
+        }
 
         /// <summary>
         /// 자동으로 부여할 역할 ID
@@ -34,7 +43,7 @@ namespace SeagullDiscordBot
         {
             return new Dictionary<string, string>
             {
-                ["AutoRoleEnabled"] = AutoRoleEnabled.ToString(),
+                //["AutoRoleEnabled"] = AutoRoleEnabled.ToString(),
                 ["AutoRoleId"] = AutoRoleId?.ToString() ?? "",
 				["AuthChannelId"] = AuthChannelId?.ToString() ?? "",
 				["SpamDetectionInterval"] = SpamDetectionInterval.ToString(),
@@ -46,8 +55,8 @@ namespace SeagullDiscordBot
         /// </summary>
         public void FromDictionary(Dictionary<string, string> dict)
         {
-            if (dict.TryGetValue("AutoRoleEnabled", out string? autoRoleEnabled) && bool.TryParse(autoRoleEnabled, out bool autoRoleEnabledValue))
-                AutoRoleEnabled = autoRoleEnabledValue;
+            //if (dict.TryGetValue("AutoRoleEnabled", out string? autoRoleEnabled) && bool.TryParse(autoRoleEnabled, out bool autoRoleEnabledValue))
+            //    AutoRoleEnabled = autoRoleEnabledValue;
 
             if (dict.TryGetValue("AutoRoleId", out string? autoRoleId) && !string.IsNullOrEmpty(autoRoleId) && ulong.TryParse(autoRoleId, out ulong autoRoleIdValue))
                 AutoRoleId = autoRoleIdValue;

@@ -69,6 +69,9 @@ namespace SeagullDiscordBot.Modules
 
 					var botRole = Context.Guild.Roles.FirstOrDefault(r => r.Name == "갈매기봇");
 					await result.Channel.AddPermissionOverwriteAsync(botRole, botPermissions);
+
+					Config.Settings.AuthChannelId = result.Channel.Id;
+					Config.SaveSettings();
 				}
 				catch (Exception ex)
 				{

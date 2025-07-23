@@ -122,6 +122,7 @@ namespace SeagullDiscordBot
 				lines.Add("=== 현재 봇 설정 ===");
 				lines.Add($"자동 역할 부여: {dict["AutoRoleEnabled"]}");
 				lines.Add($"자동 역할 ID: {(string.IsNullOrEmpty(dict["AutoRoleId"]) ? "설정되지 않음" : dict["AutoRoleId"])}");
+				lines.Add($"인증 채널 ID: {(string.IsNullOrEmpty(dict["AuthChannelId"]) ? "설정되지 않음" : dict["AuthChannelId"])}");
 				lines.Add($"스팸 감지 간격 (초): {dict["SpamDetectionInterval"]}");
 				
 				return string.Join("\n", lines);
@@ -185,6 +186,7 @@ namespace SeagullDiscordBot
 			lines.Add("# 역할 설정");
 			lines.Add($"AutoRoleEnabled={configDict["AutoRoleEnabled"]}");
 			lines.Add($"AutoRoleId={configDict["AutoRoleId"]}");
+			lines.Add($"AuthChannelId={configDict["AuthChannelId"]}");
 			lines.Add("");
 			
 			lines.Add("# 도배 감지 설정");	

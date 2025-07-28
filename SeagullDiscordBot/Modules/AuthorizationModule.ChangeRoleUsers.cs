@@ -75,7 +75,7 @@ namespace SeagullDiscordBot.Modules
 					await Task.Delay(1000);
 				}
 
-				await FollowupAsync($"역할 추가 완료: 총 {totalUsers}명 중 {successCount}명 성공, {errorCount}명 실패\n(관리자 및 봇 {excludedCount}명 제외됨)", ephemeral: true);
+				await FollowupAsync($"역할 추가 완료: 총 {totalUsers}명 중 {successCount}명 성공, {errorCount}명 실패\n(관리자 및 봇 {excludedCount}명 제외)", ephemeral: true);
 			}
 			catch (Exception ex)
 			{

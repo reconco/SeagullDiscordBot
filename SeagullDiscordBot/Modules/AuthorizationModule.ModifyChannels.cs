@@ -76,7 +76,7 @@ namespace SeagullDiscordBot.Modules
 				}
 			}
 
-			await FollowupAsync($"기존 채널들의 권한 변경 완료! ( Everyone 역할: 메시지 전송 불가, {verifiedRole.Name} 역할: 메시지 전송 허용)", ephemeral: true);
+			await FollowupAsync($"기존 채널들의 권한 변경 완료! (활동 가능 채널에서 Everyone 역할: 메시지 전송 불가, {verifiedRole.Name} 역할: 메시지 전송 허용)", ephemeral: true);
 			Logger.Print($"총 모든 채널의 권한이 수정되었습니다. Everyone 메시지 전송 불가, {verifiedRole.Name} 메시지 전송 허용");
 		}
 

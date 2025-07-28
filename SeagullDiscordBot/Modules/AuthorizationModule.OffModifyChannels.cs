@@ -15,7 +15,7 @@ namespace SeagullDiscordBot.Modules
 		[ComponentInteraction("auth_off_modify_channel_button")]
 		public async Task AuthOffModifyChannelButton()
 		{
-			await RespondAsync("기존 채널들의 갈매기 권한을 제거하고 everyone 역할에게 메시지 전송 권한을 복구합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
+			await RespondAsync("기존 채널들의 갈매기 권한을 제거하고, 갈매기 역할의 메시지 전송 권한이 유효했던 채널에서 everyone 역할에게 메시지 전송 권한을 복구합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
 			
 			Logger.Print($"'{Context.User.Username}'님이 채널 권한 원복 버튼을 클릭했습니다.");
 
@@ -92,7 +92,7 @@ namespace SeagullDiscordBot.Modules
 				}
 			}
 
-			await FollowupAsync($"기존 채널들의 권한 변경 완료! ( Everyone 역할: 메시지 전송 허용)", ephemeral: true);
+			await FollowupAsync($"기존 채널들의 권한 변경 완료! (활동 가능 채널에서 Everyone 역할: 메시지 전송 허용)", ephemeral: true);
 			Logger.Print($"총 모든 채널의 권한이 수정되었습니다. Everyone 메시지 전송 허용");
 		}
 	}

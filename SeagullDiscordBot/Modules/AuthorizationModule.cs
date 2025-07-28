@@ -9,7 +9,9 @@ namespace SeagullDiscordBot.Modules
 	public partial class AuthorizationModule : InteractionModuleBase<SocketInteractionContext>
 	{
 		const string _onDescription = "인증된 사용자만 메세지를 보낼 수 있는 인증 시스템을 구축합니다.\n" +
-			"1번부터 순서대로 눌러주세요." +
+			"1번부터 순서대로 눌러주세요.";
+
+		const string _onDescription2 =
 			"버튼을 누르고 완료 메시지가 나올때까지 기다린 다음 다음 버튼을 눌러주세요.\n" +
 			"1. 갈매기 역할 추가\n" +
 			"2. 기존 사용자들 모두 갈매기 역할로 변경(관리자, 봇 제외)\n" +
@@ -17,7 +19,9 @@ namespace SeagullDiscordBot.Modules
 			"4. 규칙 안내 및 인증 채널 추가";
 
 		const string _offDescription = "인증 시스템 제거를 시작합니다.\n" +
-			"1번부터 순서대로 눌러주세요." +
+			"1번부터 순서대로 눌러주세요.";
+
+		const string _offDescription2 =
 			"버튼을 누르고 완료 메시지가 나올때까지 기다린 다음 다음 버튼을 눌러주세요.\n" +
 			"1. 기존 채널들 권한 수정(메시지 전송가능 채널만, 모든 사용자가 메시지 전송 가능하도록)\n" +
 			"2. 사용자들 모두 갈매기 역할 제거\n" +
@@ -41,8 +45,14 @@ namespace SeagullDiscordBot.Modules
 				.WithButton("3. 채널 권한 수정", "modify_channel_button", ButtonStyle.Primary, emote: new Emoji("🔒"))
 				.WithButton("4. 사용자 인증 채널 추가", "add_rule_channel_button", ButtonStyle.Primary, emote: new Emoji("📜"));
 
+			var embed = new EmbedBuilder()
+				.WithColor(Color.Green)
+				.WithTitle("인증 시스템 구축")
+				.WithDescription(_onDescription2)
+				.WithCurrentTimestamp()
+				.Build();
 
-			await RespondAsync(_onDescription, components: builder.Build(), ephemeral: true);
+			await RespondAsync(_onDescription, embed: embed, components: builder.Build(), ephemeral: true);
 
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 authorization_on 명령어를 사용했습니다.");
@@ -59,7 +69,14 @@ namespace SeagullDiscordBot.Modules
 				.WithButton("4. 사용자 인증 채널 제거", "auth_off_remove_rule_channel_button", ButtonStyle.Primary, emote: new Emoji("📜"));
 
 
-			await RespondAsync(_offDescription, components: builder.Build(), ephemeral: true);
+			var embed = new EmbedBuilder()
+				.WithColor(Color.Orange)
+				.WithTitle("인증 시스템 제거")
+				.WithDescription(_offDescription2)
+				.WithCurrentTimestamp()
+				.Build();
+
+			await RespondAsync(_offDescription, embed: embed, components: builder.Build(), ephemeral: true);
 
 			// 로그 남기기
 			Logger.Print($"'{Context.User.Username}'님이 authorization_off 명령어를 사용했습니다.");

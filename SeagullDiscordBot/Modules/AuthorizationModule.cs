@@ -10,7 +10,7 @@ namespace SeagullDiscordBot.Modules
 	{
 		const string _onDescription = "인증된 사용자만 메세지를 보낼 수 있는 인증 시스템을 구축합니다.\n" +
 			"1번부터 순서대로 눌러주세요." +
-			"버튼을 누르고 완료 메시지가 나올때까지 기다린 다음 다음 버튼을 눌러주세요.\n";
+			"버튼을 누르고 완료 메시지가 나타나는 것을 확인한 뒤, 다음 버튼을 눌러주세요.\n";
 
 		const string _onDescription2 =
 			"1. 갈매기 역할 추가\n" +
@@ -20,7 +20,7 @@ namespace SeagullDiscordBot.Modules
 
 		const string _offDescription = "인증 시스템 제거를 시작합니다.\n" +
 			"1번부터 순서대로 눌러주세요." +
-			"버튼을 누르고 완료 메시지가 나올때까지 기다린 다음 다음 버튼을 눌러주세요.\n";
+			"버튼을 누르고 완료 메시지가 나타나는 것을 확인한 뒤, 다음 버튼을 눌러주세요.\n";
 
 		const string _offDescription2 =
 			"1. 기존 채널들 권한 수정(메시지 전송가능 채널만, 모든 사용자가 메시지 전송 가능하도록)\n" +

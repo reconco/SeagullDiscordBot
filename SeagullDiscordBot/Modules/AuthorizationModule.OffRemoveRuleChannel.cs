@@ -14,7 +14,7 @@ namespace SeagullDiscordBot.Modules
 		[ComponentInteraction("auth_off_remove_rule_channel_button")]
 		public async Task AuthOffRemoveRuleChannelButton()
 		{
-			await RespondAsync("규칙 안내 및 인증 채널을 제거합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
+			await RespondAsync("사용자 인증 채널을 제거합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
 			Logger.Print($"'{Context.User.Username}'님이 규칙 채널 제거 버튼을 클릭했습니다.");
 
 			var guild = Context.Guild;
@@ -64,7 +64,7 @@ namespace SeagullDiscordBot.Modules
 				await FollowupAsync($"채널 삭제 중 오류가 발생했습니다: {ex.Message}", ephemeral: true);
 			}
 
-			await FollowupAsync("규칙 안내 및 인증 채널 제거 완료!", ephemeral: true);
+			await FollowupAsync("사용자 인증 채널 제거 완료!", ephemeral: true);
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace SeagullDiscordBot.Modules
 				.WithButton("1. 갈매기 역할 추가", "add_role_button", ButtonStyle.Primary, emote: new Emoji("🔑"))
 				.WithButton("2. 기존 사용자들 모두 갈매기 역할 추가", "change_role_users_button", ButtonStyle.Primary, emote: new Emoji("👥"))
 				.WithButton("3. 채널 권한 수정", "modify_channel_button", ButtonStyle.Primary, emote: new Emoji("🔒"))
-				.WithButton("4. 규칙 채널 추가", "add_rule_channel_button", ButtonStyle.Primary, emote: new Emoji("📜"));
+				.WithButton("4. 사용자 인증 채널 추가", "add_rule_channel_button", ButtonStyle.Primary, emote: new Emoji("📜"));
 
 
 			await RespondAsync(_onDescription, components: builder.Build(), ephemeral: true);
@@ -56,7 +56,7 @@ namespace SeagullDiscordBot.Modules
 				.WithButton("1. 기존 채널들 갈매기 권한 제거", "auth_off_modify_channel_button", ButtonStyle.Primary, emote: new Emoji("🔒"))
 				.WithButton("2. 사용자들 모두 갈매기 역할 제거", "auth_off_change_role_users_button", ButtonStyle.Primary, emote: new Emoji("👥"))
 				.WithButton("3. 갈매기 역할 삭제", "auth_off_remove_role_button", ButtonStyle.Primary, emote: new Emoji("🔑"))
-				.WithButton("4. 규칙 안내 및 인증 채널 제거", "auth_off_remove_rule_channel_button", ButtonStyle.Primary, emote: new Emoji("📜"));
+				.WithButton("4. 사용자 인증 채널 제거", "auth_off_remove_rule_channel_button", ButtonStyle.Primary, emote: new Emoji("📜"));
 
 
 			await RespondAsync(_offDescription, components: builder.Build(), ephemeral: true);

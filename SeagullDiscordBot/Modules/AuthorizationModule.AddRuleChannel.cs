@@ -85,20 +85,9 @@ namespace SeagullDiscordBot.Modules
 
 				await Task.Delay(1000); // 1초 대기
 
-				// 생성된 채널에 규칙 메시지 전송
-				var embed = new EmbedBuilder()
-					.WithColor(Color.Blue)
-					.WithTitle("📜 서버 규칙 안내")
-					.WithDescription("이 채널은 사용자 인증을 위한 채널입니다.\n아래 규칙을 확인해주세요.")
-					.AddField("1", "문의 채널에 잡담 금지")
-					.AddField("2", "문의 답변에 말로 대답하지 말고 이모지 사용")
-					.WithFooter(footer => footer.Text = "인증 후에 메시지 보내기 권한이 활성화 됩니다. 밑에 '인증하기' 버튼을 눌러주세요.")
-					.WithCurrentTimestamp()
-					.Build();
-
-				// 인증 버튼 추가
-				var button = new ComponentBuilder()
-					.WithButton("인증하기", "verify_user_button", ButtonStyle.Success, emote: new Emoji("✅"));
+				// 생성된 채널에 안내 메시지, 인증 버튼 추가
+				Embed embed = CreateAuthorizationEmbed("");
+				var button = CreateAuthorizationButton();
 
 				// 생성된 채널에 메시지 전송
 
@@ -114,6 +103,27 @@ namespace SeagullDiscordBot.Modules
 			}
 
 			await FollowupAsync("사용자 인증 채널을 추가 완료!", ephemeral: true);
+		}
+
+		static public Embed CreateAuthorizationEmbed(string customMessage)
+		{
+			if (string.IsNullOrEmpty(customMessage))
+			{
+				customMessage = "1. 문의 채널에 잡담 금지\n2. 문의 답변에 말로 대답하지 말고 이모지 사용";
+			}
+
+			return new EmbedBuilder()
+				.WithColor(Color.Blue)
+				.WithTitle("📜 안내")
+				.WithDescription(customMessage)
+				.WithFooter(footer => footer.Text = "인증 후에 메시지 보내기 권한이 활성화 됩니다. 밑에 '인증하기' 버튼을 눌러주세요.")
+				.Build();
+		}
+
+		static public ComponentBuilder CreateAuthorizationButton()
+		{
+			return new ComponentBuilder()
+				.WithButton("인증하기", "verify_user_button", ButtonStyle.Success, emote: new Emoji("✅"));
 		}
 
 		// 채널 권한 수정 버튼 클릭 시 실행될 메서드

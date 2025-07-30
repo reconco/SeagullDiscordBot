@@ -13,7 +13,7 @@ namespace SeagullDiscordBot.Modules
 		public async Task AddAllUserRoleButton()
 		{
 			await RespondAsync("모든 사용자들에게 역할을 추가합니다...\n완료 메시지가 나타날때까지 기다려주세요.(1초당 1명 처리)", ephemeral: true);
-			Logger.Print($"'{Context.User.Username}'님이 사용자 역할 추가 버튼을 클릭했습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 사용자 역할 추가 버튼을 클릭했습니다.");
 
 			var guild = Context.Guild;
 			var requestedBy = Context.User.Username;
@@ -30,8 +30,10 @@ namespace SeagullDiscordBot.Modules
 			int errorCount = 0;
 			int excludedCount = allUsers.Count - targetUsers.Count;
 
-
-			var targetRole = guild.Roles.FirstOrDefault(r => r.Id == Config.Settings.AutoRoleId);
+			// 현재 서버의 설정 가져오기
+			var settings = Config.GetSettings(Context.Guild.Id);
+			var targetRole = guild.Roles.FirstOrDefault(r => r.Id == settings.AutoRoleId);
+			
 			if(targetRole == null)
 			{
 				await FollowupAsync("자동 역할이 설정되어 있지 않습니다. 1번 '갈매기 역할 추가'를 눌러 설정 후 다시 시도해주세요.", ephemeral: true);
@@ -79,7 +81,7 @@ namespace SeagullDiscordBot.Modules
 			}
 			catch (Exception ex)
 			{
-				Logger.Print($"사용자 역할 추가 중 오류 발생: {ex.Message}", LogType.ERROR);
+				Logger.Print($"서버 {Context.Guild.Id} 사용자 역할 추가 중 오류 발생: {ex.Message}", LogType.ERROR);
 				await FollowupAsync($"역할 추가 중 오류가 발생했습니다: {ex.Message}", ephemeral: true);
 			}
 

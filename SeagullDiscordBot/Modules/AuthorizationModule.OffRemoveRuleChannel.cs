@@ -15,28 +15,32 @@ namespace SeagullDiscordBot.Modules
 		public async Task AuthOffRemoveRuleChannelButton()
 		{
 			await RespondAsync("사용자 인증 채널을 제거합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
-			Logger.Print($"'{Context.User.Username}'님이 규칙 채널 제거 버튼을 클릭했습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 규칙 채널 제거 버튼을 클릭했습니다.");
 
 			var guild = Context.Guild;
 
 			try
 			{
+				// 현재 서버의 설정 가져오기
+				var settings = Config.GetSettings(Context.Guild.Id);
+				
 				// Config.Settings.AuthChannelId로 인증 채널 찾기
-				if (Config.Settings.AuthChannelId == null)
+				if (settings.AuthChannelId == null)
 				{
 					await FollowupAsync("인증 채널 ID가 설정되어 있지 않습니다. 이미 삭제되었거나 설정되지 않았을 수 있습니다.", ephemeral: true);
 					Logger.Print("인증 채널 ID가 설정되어 있지 않습니다.", LogType.WARNING);
 					return;
 				}
 
-				var ruleChannel = guild.GetTextChannel(Config.Settings.AuthChannelId.Value);
+				var ruleChannel = guild.GetTextChannel(settings.AuthChannelId.Value);
 
 				if (ruleChannel == null)
 				{
-
 					// 채널을 찾을 수 없더라도 Config 설정은 초기화
-					Config.Settings.AuthChannelId = null;
-					Config.SaveSettings();
+					Config.UpdateSetting(Context.Guild.Id, configSettings =>
+					{
+						configSettings.AuthChannelId = null;
+					});
 
 					await FollowupAsync("인증 채널 설정을 초기화했습니다.", ephemeral: true);
 					return;
@@ -52,15 +56,17 @@ namespace SeagullDiscordBot.Modules
 				await ruleChannel.DeleteAsync();
 
 				await FollowupAsync($"'{channelName}' 채널이 성공적으로 삭제되었습니다.{categoryInfo}", ephemeral: true);
-				Logger.Print($"'{Context.User.Username}'님이 '{channelName}' 채널을 삭제했습니다.{categoryInfo}");
+				Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 '{channelName}' 채널을 삭제했습니다.{categoryInfo}");
 
-				// Config 설정 초기화
-				Config.Settings.AuthChannelId = null;
-				Config.SaveSettings();
+				// 현재 서버의 Config 설정 초기화
+				Config.UpdateSetting(Context.Guild.Id, configSettings =>
+				{
+					configSettings.AuthChannelId = null;
+				});
 			}
 			catch (Exception ex)
 			{
-				Logger.Print($"규칙 채널 삭제 중 오류 발생: {ex.Message}", LogType.ERROR);
+				Logger.Print($"서버 {Context.Guild.Id} 규칙 채널 삭제 중 오류 발생: {ex.Message}", LogType.ERROR);
 				await FollowupAsync($"채널 삭제 중 오류가 발생했습니다: {ex.Message}", ephemeral: true);
 			}
 

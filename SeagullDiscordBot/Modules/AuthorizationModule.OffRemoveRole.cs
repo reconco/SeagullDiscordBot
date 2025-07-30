@@ -16,14 +16,17 @@ namespace SeagullDiscordBot.Modules
 		public async Task AuthOffRemoveRoleButton()
 		{
 			await RespondAsync("갈매기 역할을 삭제합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
-			Logger.Print($"'{Context.User.Username}'님이 갈매기 역할 삭제 버튼을 클릭했습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 갈매기 역할 삭제 버튼을 클릭했습니다.");
 
 			var guild = Context.Guild;
 
 			try
 			{
+				// 현재 서버의 설정 가져오기
+				var settings = Config.GetSettings(Context.Guild.Id);
+				
 				// 갈매기 역할 찾기
-				var targetRole = guild.Roles.FirstOrDefault(r => r.Id == Config.Settings.AutoRoleId);
+				var targetRole = guild.Roles.FirstOrDefault(r => r.Id == settings.AutoRoleId);
 				if (targetRole == null)
 				{
 					await FollowupAsync("갈매기 역할이 설정되어 있지 않거나 이미 삭제되었습니다.", ephemeral: true);
@@ -47,16 +50,18 @@ namespace SeagullDiscordBot.Modules
 				// 역할 삭제
 				await targetRole.DeleteAsync();
 
-				// Config에서 AutoRoleId 초기화
-				Config.Settings.AutoRoleId = null;
-				Config.SaveSettings();
+				// 현재 서버의 Config에서 AutoRoleId 초기화
+				Config.UpdateSetting(Context.Guild.Id, settings =>
+				{
+					settings.AutoRoleId = null;
+				});
 
 				await FollowupAsync($"'{roleName}' 역할이 성공적으로 삭제되었습니다.", ephemeral: true);
-				Logger.Print($"'{Context.User.Username}'님이 '{roleName}' 역할을 삭제했습니다.");
+				Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 '{roleName}' 역할을 삭제했습니다.");
 			}
 			catch (Exception ex)
 			{
-				Logger.Print($"갈매기 역할 삭제 중 오류 발생: {ex.Message}", LogType.ERROR);
+				Logger.Print($"서버 {Context.Guild.Id} 갈매기 역할 삭제 중 오류 발생: {ex.Message}", LogType.ERROR);
 				await FollowupAsync($"역할 삭제 중 오류가 발생했습니다: {ex.Message}", ephemeral: true);
 			}
 

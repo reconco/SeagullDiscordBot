@@ -19,7 +19,7 @@ namespace SeagullDiscordBot.Modules
 		{
 			await RespondAsync("사용자 인증 채널을 추가합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
 			// 규칙 채널 추가 기능 구현
-			Logger.Print($"'{Context.User.Username}'님이 사용자 인증 채널 추가 버튼을 클릭했습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 사용자 인증 채널 추가 버튼을 클릭했습니다.");
 
 			// 채널 서비스를 통해 텍스트 채널 생성 (결과 객체 반환)
 			ChannelService channelService = new ChannelService();
@@ -61,7 +61,6 @@ namespace SeagullDiscordBot.Modules
 				createPrivateThreads: PermValue.Allow // 비공개 쓰레드 생성 거부
 				);
 
-
 				try
 				{
 					var everyoneRole = Context.Guild.EveryoneRole;
@@ -70,12 +69,15 @@ namespace SeagullDiscordBot.Modules
 					var botRole = Context.Guild.Roles.FirstOrDefault(r => r.Name == "갈매기봇");
 					await result.Channel.AddPermissionOverwriteAsync(botRole, botPermissions);
 
-					Config.Settings.AuthChannelId = result.Channel.Id;
-					Config.SaveSettings();
+					// 현재 서버의 설정 업데이트
+					Config.UpdateSetting(Context.Guild.Id, settings =>
+					{
+						settings.AuthChannelId = result.Channel.Id;
+					});
 				}
 				catch (Exception ex)
 				{
-					Logger.Print($"채널 권한 설정 중 오류 발생: {ex.Message}", LogType.ERROR);
+					Logger.Print($"서버 {Context.Guild.Id} 채널 권한 설정 중 오류 발생: {ex.Message}", LogType.ERROR);
 					await FollowupAsync($"채널 권한 설정 중 오류가 발생했습니다: {ex.Message}", ephemeral: true);
 					return;
 				}
@@ -90,11 +92,9 @@ namespace SeagullDiscordBot.Modules
 				var button = CreateAuthorizationButton();
 
 				// 생성된 채널에 메시지 전송
-
 				await Task.Delay(1000); // 1초 대기
 				await result.Channel.SendMessageAsync(embed: embed);
 				await result.Channel.SendMessageAsync("아래 버튼을 클릭하여 인증을 완료하세요:", components: button.Build());
-				//await result.Channel.SendMessageAsync("Test",embed: embed, components: button.Build());
 			}
 			else
 			{
@@ -130,12 +130,15 @@ namespace SeagullDiscordBot.Modules
 		[ComponentInteraction("verify_user_button")]
 		public async Task VerifyUserButton()
 		{
-			Logger.Print($"'{Context.User.Username}'님이 캡챠 인증을 시작했습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 캡챠 인증을 시작했습니다.");
 
 			try
 			{
-				// Config.Settings.AutoRoleId가 설정되어 있는지 확인
-				if (Config.Settings.AutoRoleId == null)
+				// 현재 서버의 설정 가져오기
+				var settings = Config.GetSettings(Context.Guild.Id);
+				
+				// 자동 역할이 설정되어 있는지 확인
+				if (settings.AutoRoleId == null)
 				{
 					await RespondAsync("갈매기 역할이 설정되지 않았습니다. 관리자에게 문의하세요.", ephemeral: true);
 					return;
@@ -150,7 +153,7 @@ namespace SeagullDiscordBot.Modules
 				}
 
 				// 사용자가 이미 갈매기 역할을 가지고 있는지 확인
-				var userSeagullRole = guildUser.Roles.FirstOrDefault(r => r.Id == Config.Settings.AutoRoleId);
+				var userSeagullRole = guildUser.Roles.FirstOrDefault(r => r.Id == settings.AutoRoleId);
 				if (userSeagullRole != null)  // ✅ 역할이 있으면
 				{
 					await RespondAsync("이미 인증된 사용자입니다.", ephemeral: true);
@@ -181,7 +184,7 @@ namespace SeagullDiscordBot.Modules
 			}
 			catch (Exception ex)
 			{
-				Logger.Print($"인증 처리 중 오류 발생: {ex.Message}", LogType.ERROR);
+				Logger.Print($"서버 {Context.Guild.Id} 인증 처리 중 오류 발생: {ex.Message}", LogType.ERROR);
 				await FollowupAsync("인증 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", ephemeral: true);
 			}
 		}
@@ -212,13 +215,17 @@ namespace SeagullDiscordBot.Modules
 
 				if (verificationResult.IsSuccess)
 				{
+					// 현재 서버의 설정 가져오기
+					var settings = Config.GetSettings(Context.Guild.Id);
+					
 					// 인증 성공 - 갈매기 역할 부여
-					var seagullRole = Context.Guild.Roles.FirstOrDefault(r => r.Id == Config.Settings.AutoRoleId);
+					var seagullRole = Context.Guild.Roles.FirstOrDefault(r => r.Id == settings.AutoRoleId);
 					
 					if (seagullRole == null)
 					{
 						await FollowupAsync($"갈매기 역할이 존재하지 않아 인증을 진행할 수 없습니다. 관리자에게 문의하십시오.", ephemeral: true);
-						Logger.Print($"'{Context.User.Username}'님이 인증을 시도했지만 갈매기 역할이 존재하지 않아 실패했습니다.", LogType.WARNING);
+						Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 인증을 시도했지만 갈매기 역할이 존재하지 않아 실패했습니다.", LogType.WARNING);
+						return;
 					}
 
 					// 사용자에게 역할 부여
@@ -237,7 +244,7 @@ namespace SeagullDiscordBot.Modules
 
 							await FollowupAsync(embed: successEmbed, ephemeral: true);
 							
-							Logger.Print($"'{Context.User.Username}'님이 캡차 인증에 성공하여 갈매기 역할을 부여받았습니다.");
+							Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 캡챠 인증에 성공하여 갈매기 역할을 부여받았습니다.");
 						}
 						else
 						{
@@ -251,25 +258,12 @@ namespace SeagullDiscordBot.Modules
 				}
 				else
 				{
-					// 인증 실패 - 새로운 이미지와 함께 실패 메시지 표시
+					// 인증 실패 - 실패 메시지 표시
 					var failEmbed = new EmbedBuilder()
 						.WithColor(Color.Red)
 						.WithTitle("❌ 인증 실패")
 						.WithDescription(verificationResult.Message)
 						.WithCurrentTimestamp();
-
-					//// 재시도 가능한 경우 새로운 캡차 이미지 표시
-					//if (verificationResult.RetryImageData != null)
-					//{
-					//	failEmbed.WithImageUrl("attachment://captcha_retry.jpg");
-					//	failEmbed.WithDescription($"{verificationResult.Message}\n\n**다시 시도해주세요.**");
-
-					//	var retryButton = new ComponentBuilder()
-					//		.WithButton("다시 입력", "captcha_input_button", ButtonStyle.Primary, emote: new Emoji("🔄"));
-
-					//	using var stream = new MemoryStream(verificationResult.RetryImageData);
-					//	await FollowupWithFileAsync(stream, "captcha_retry.jpg", embed: failEmbed.Build(), components: retryButton.Build(), ephemeral: true);
-					//}
 
 					if (verificationResult.Retry)
 					{
@@ -282,12 +276,12 @@ namespace SeagullDiscordBot.Modules
 						await FollowupAsync(embed: failEmbed.Build(), ephemeral: true);
 					}
 					
-					Logger.Print($"'{Context.User.Username}'님의 캡차 인증 실패: {verificationResult.Message}");
+					Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님의 캡차 인증 실패: {verificationResult.Message}");
 				}
 			}
 			catch (Exception ex)
 			{
-				Logger.Print($"캡차 모달 처리 중 오류 발생: {ex.Message}", LogType.ERROR);
+				Logger.Print($"서버 {Context.Guild.Id} 캡차 모달 처리 중 오류 발생: {ex.Message}", LogType.ERROR);
 				await FollowupAsync("인증 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", ephemeral: true);
 			}
 		}

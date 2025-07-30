@@ -15,29 +15,33 @@ namespace SeagullDiscordBot.Modules
 			try
 			{
 				var embed = new EmbedBuilder()
-					.WithTitle("🛠️ 봇 현재 설정 (텍스트 파일 기반)");
+					.WithTitle($"🛠️ 서버별 봇 설정")
+					.WithDescription($"서버: {Context.Guild.Name} (ID: {Context.Guild.Id})");
 
-				var settings = Config.Settings;
+				// 현재 서버의 설정 가져오기
+				var settings = Config.GetSettings(Context.Guild.Id);
 
 				string authRoleName = settings.AutoRoleId.HasValue 
-					? Context.Guild.GetRole(settings.AutoRoleId.Value)?.Name ?? "" 
+					? Context.Guild.GetRole(settings.AutoRoleId.Value)?.Name ?? "역할을 찾을 수 없음" 
 					: "";
 
 				string authChannelName = settings.AuthChannelId.HasValue 
-					? Context.Guild.GetTextChannel(settings.AuthChannelId.Value)?.Name ?? "" 
+					? Context.Guild.GetTextChannel(settings.AuthChannelId.Value)?.Name ?? "채널을 찾을 수 없음" 
 					: "";
 
 				embed.AddField("🎭 자동 역할 부여", settings.AutoRoleEnabled ? "✅" : "❌");
-				embed.AddField("🏷️ 자동 역할 ID", $"{authRoleName}({settings.AutoRoleId?.ToString()})" ?? "❌");
-				embed.AddField("🏷️ 자동 역할 부여 채널", $"{authChannelName}({settings.AuthChannelId?.ToString()})" ?? "❌");
-				embed.AddField("⏱️ 도배 감지 간격 (초)", settings.SpamDetectionInterval.ToString());
+				embed.AddField("🏷️ 자동 역할", 
+					settings.AutoRoleId.HasValue ? $"{authRoleName} ({settings.AutoRoleId})" : "❌ 설정되지 않음");
+				embed.AddField("📢 인증 채널", 
+					settings.AuthChannelId.HasValue ? $"{authChannelName} ({settings.AuthChannelId})" : "❌ 설정되지 않음");
+				embed.AddField("⏱️ 스팸 감지 간격 (초)", settings.SpamDetectionInterval.ToString());
 
 				await RespondAsync(embed: embed.Build(), ephemeral: true);
-				Logger.Print($"'{Context.User.Username}'님이 봇 설정을 조회했습니다.");
+				Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 봇 설정을 조회했습니다.");
 			}
 			catch (System.Exception ex)
 			{
-				Logger.Print($"설정 조회 중 오류 발생: {ex.Message}", LogType.ERROR);
+				Logger.Print($"서버 {Context.Guild.Id} 설정 조회 중 오류 발생: {ex.Message}", LogType.ERROR);
 				await RespondAsync("설정을 조회하는 중 오류가 발생했습니다.", ephemeral: true);
 			}
 		}
@@ -47,11 +51,12 @@ namespace SeagullDiscordBot.Modules
 		{
 			string botInfo = 
 				$"갈매기 봇 정보\n" +
-				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}";
+				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}\n" +
+				$"현재 서버: {Context.Guild.Name} (ID: {Context.Guild.Id})";
 
 			await RespondAsync(botInfo, ephemeral: true);
 
-			Logger.Print($"'{Context.User.Username}'사용자가 봇 정보를 요청");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 봇 정보를 요청했습니다.");
 		}
 	}
 }

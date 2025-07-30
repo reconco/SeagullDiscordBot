@@ -70,7 +70,7 @@ namespace SeagullDiscordBot.Services
 				var newRole = await guild.CreateRoleAsync(
 					roleName,
 					permissions ?? GuildPermissions.None,
-					color ?? Color.Blue,
+					color,
 					isHoisted,
 					isMentionable);
 
@@ -124,7 +124,7 @@ namespace SeagullDiscordBot.Services
 				var newRole = await guild.CreateRoleAsync(
 					roleName,
 					permissions ?? GuildPermissions.None,
-					color ?? Color.Blue,
+					color,
 					isHoisted,
 					isMentionable);
 

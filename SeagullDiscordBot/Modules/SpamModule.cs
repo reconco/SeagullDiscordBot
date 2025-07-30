@@ -21,49 +21,42 @@ namespace SeagullDiscordBot.Modules
 		private static DateTime _lastCleanupTime = DateTime.MinValue;
 		private static readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(60); // 60분마다 정리
 
-		private static int SpamMessageCooldownTime
-		{
-			get => Config.Settings.SpamDetectionInterval;
-			set
-			{
-				if (value < 0)
-					Config.Settings.SpamDetectionInterval = 0;
-				else
-					Config.Settings.SpamDetectionInterval = value;
-			}
-		}
-
 		[SlashCommand("set_spam_message_cooldown_time", "반복 메시지 쿨다운 시간을 정합니다(0초 설정시 Off)")]
 		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
 		public async Task SetSpamMessageCooldownTime(
 			[Summary("time", "도배 방지 시간(초)")] int time)
 		{
-			SpamMessageCooldownTime = time;
+			// 현재 서버의 설정 업데이트
+			Config.UpdateSetting(Context.Guild.Id, settings =>
+			{
+				settings.SpamDetectionInterval = time < 0 ? 0 : time;
+			});
 
-			await RespondAsync($"반복 메시지 쿨다운 시간이 {SpamMessageCooldownTime}초로 지정 되었습니다.", ephemeral: true);
+			await RespondAsync($"이 서버의 반복 메시지 쿨다운 시간이 {time}초로 설정되었습니다.", ephemeral: true);
 
 			// 로그 남기기
-			Logger.Print($"'{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {SpamMessageCooldownTime}초로 지정하였습니다.");
-
-			Config.SaveSettings(); // 설정 저장
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {time}초로 설정했습니다.");
 		}
 
 		[SlashCommand("get_spam_message_cooldown_time", "반복 메시지 쿨다운 시간을 확인합니다")]
 		[RequireUserPermission(GuildPermission.Administrator)] // 관리자 권한이 있는 사용자만 사용 가능
 		public async Task GetSpamMessageCooldownTime()
 		{
-			if (SpamMessageCooldownTime < 0)
+			// 현재 서버의 설정 가져오기
+			var settings = Config.GetSettings(Context.Guild.Id);
+			var cooldownTime = settings.SpamDetectionInterval;
+
+			if (cooldownTime <= 0)
 			{
-				await RespondAsync("반복 메시지 쿨다운 시간이 설정되어 있지 않습니다(0초).", ephemeral: true);
-				return;
+				await RespondAsync("이 서버의 반복 메시지 쿨다운 시간이 설정되지 않았습니다(0초 - 비활성화).", ephemeral: true);
 			}
 			else
 			{
-				await RespondAsync($"현재 반복 메시지 쿨다운 시간은 {SpamMessageCooldownTime}초입니다.", ephemeral: true);
+				await RespondAsync($"이 서버의 현재 반복 메시지 쿨다운 시간은 {cooldownTime}초입니다.", ephemeral: true);
 			}
 
 			// 로그 남기기
-			Logger.Print($"'{Context.User.Username}'님이 반복 메시지 쿨다운 시간을 {SpamMessageCooldownTime}초인 것을 확인하였습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 반복 메시지 쿨다운 시간({cooldownTime}초)을 확인했습니다.");
 		}
 
 		// 메시지 받았을 때 처리하는 정적 메서드
@@ -72,10 +65,20 @@ namespace SeagullDiscordBot.Modules
 			if (!ShouldProcessMessage(message))
 				return;
 
+			// 메시지가 전송된 서버의 설정 가져오기
+			var guild = (message.Channel as SocketGuildChannel)?.Guild;
+			if (guild == null) return;
+
+			var settings = Config.GetSettings(guild.Id);
+			var cooldownTime = settings.SpamDetectionInterval;
+
+			// 해당 서버의 스팸 감지가 비활성화된 경우 (0초면 무시)
+			if (cooldownTime <= 0) return;
+
 			var userId = message.Author.Id;
 			var messageContent = message.Content;
 			var currentTime = DateTime.Now;
-			var nextCooldownTime = currentTime.AddSeconds(SpamMessageCooldownTime);
+			var nextCooldownTime = currentTime.AddSeconds(cooldownTime);
 
 			// 사용자의 메시지 정보 가져오기 또는 생성
 			var messageInfo = _spamMessageCooldowns.AddOrUpdate(
@@ -103,7 +106,7 @@ namespace SeagullDiscordBot.Modules
 								existingInfo.NextMessageTime = nextCooldownTime;
 
 								// 비동기 작업을 위해 Task.Run 사용
-								_ = Task.Run(async () => await HandleSpamDetected(message, similarity));
+								_ = Task.Run(async () => await HandleSpamDetected(message, similarity, guild.Name));
 								
 								return existingInfo; // 기존 정보 유지 (LastMessageContent는 변경하지 않음)
 							}
@@ -124,7 +127,7 @@ namespace SeagullDiscordBot.Modules
 		/// <summary>
 		/// 스팸 메시지가 감지되었을 때 처리합니다.
 		/// </summary>
-		private static async Task HandleSpamDetected(SocketMessage message, double similarity)
+		private static async Task HandleSpamDetected(SocketMessage message, double similarity, string guildName)
 		{
 			try
 			{
@@ -132,16 +135,16 @@ namespace SeagullDiscordBot.Modules
 
 				// 사용자에게 경고 메시지 전송
 				Embed embed = new EmbedBuilder()
-					.WithTitle("도배 방지 처리된 메시지")
+					.WithTitle($"도배 방지 처리된 메시지 - {guildName}")
 					.WithDescription(message.Content)
 					.WithColor(Color.Red)
 					.Build();
 
 				await message.Author.SendMessageAsync(
-					"유사한 메시지를 반복적으로 전송하여 메시지가 삭제되었습니다.\n잠시 후 메시지를 전송해주세요.", 
+					$"서버 '{guildName}'에서 유사한 메시지를 반복적으로 전송하여 메시지가 삭제되었습니다.\n잠시 후 메시지를 전송해주세요.", 
 					embed: embed);
 
-				Logger.Print($"유사한 메시지 감지: '{message.Author.Username}' - 유사도: {similarity:P2}, 쿨다운 연장");
+				Logger.Print($"서버 '{guildName}' - 유사한 메시지 감지: '{message.Author.Username}' - 유사도: {similarity:P2}, 쿨다운 연장");
 			}
 			catch (Exception ex)
 			{
@@ -216,22 +219,14 @@ namespace SeagullDiscordBot.Modules
 
 		private static bool ShouldProcessMessage(SocketMessage message)
 		{
-			// 쿨다운 시간이 설정되어 있지 않으면 아무 작업도 하지 않음
-			if (SpamMessageCooldownTime <= 0)
-				return false; 
-
 			// 봇 메시지는 무시
 			if (message.Author.IsBot)
 				return false;
 
-			//// 관리자의 메시지 무시
-			//if (message.Author is SocketGuildUser guildUser)
-			//{
-			//	if (guildUser.GuildPermissions.Administrator)// || guildUser.GuildPermissions.ManageChannels)
-			//	{
-			//		return false;
-			//	}
-			//}
+			// 길드 메시지가 아니면 무시 (DM 등)
+			var guild = (message.Channel as SocketGuildChannel)?.Guild;
+			if (guild == null)
+				return false;
 
 			// 빈 메시지 무시
 			if (string.IsNullOrWhiteSpace(message.Content))

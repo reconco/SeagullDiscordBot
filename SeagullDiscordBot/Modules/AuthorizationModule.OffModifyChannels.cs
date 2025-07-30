@@ -17,12 +17,15 @@ namespace SeagullDiscordBot.Modules
 		{
 			await RespondAsync("기존 채널들의 갈매기 권한을 제거하고, 갈매기 역할의 메시지 전송 권한이 유효했던 채널에서 everyone 역할에게 메시지 전송 권한을 복구합니다...\n완료 메시지가 나타날때까지 기다려주세요.", ephemeral: true);
 			
-			Logger.Print($"'{Context.User.Username}'님이 채널 권한 원복 버튼을 클릭했습니다.");
+			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 채널 권한 원복 버튼을 클릭했습니다.");
 
 			var everyoneRole = Context.Guild.EveryoneRole;
 			
+			// 현재 서버의 설정 가져오기
+			var settings = Config.GetSettings(Context.Guild.Id);
+			
 			// 인증된 사용자 역할을 가져옴
-			var verifiedRole = Context.Guild.Roles.FirstOrDefault(r => r.Id == Config.Settings.AutoRoleId);
+			var verifiedRole = Context.Guild.Roles.FirstOrDefault(r => r.Id == settings.AutoRoleId);
 			if (verifiedRole == null)
 			{
 				await FollowupAsync("갈매기 역할을 찾을 수 없습니다. 이미 삭제되었거나 설정되지 않았을 수 있습니다. 작업을 종료합니다.", ephemeral: true);

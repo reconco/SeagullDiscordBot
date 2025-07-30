@@ -3,10 +3,15 @@ using System.Collections.Generic;
 namespace SeagullDiscordBot
 {
     /// <summary>
-    /// 봇의 사용자 정의 설정을 저장하는 클래스 (텍스트 파일 기반)
+    /// 봇의 사용자 정의 설정을 저장하는 클래스 (각 서버별로 설정 저장)
     /// </summary>
     public class ConfigSettings
     {
+        /// <summary>
+        /// 서버 ID (Guild ID)
+        /// </summary>
+        public ulong GuildId { get; set; }
+
         /// <summary>
         /// 자동 역할 부여 여부
         /// </summary>
@@ -37,13 +42,29 @@ namespace SeagullDiscordBot
 		public int SpamDetectionInterval { get; set; } = 0;
 
         /// <summary>
+        /// 기본 생성자
+        /// </summary>
+        public ConfigSettings()
+        {
+        }
+
+        /// <summary>
+        /// 서버 ID를 지정하는 생성자
+        /// </summary>
+        /// <param name="guildId">서버 ID</param>
+        public ConfigSettings(ulong guildId)
+        {
+            GuildId = guildId;
+        }
+
+        /// <summary>
         /// 설정을 딕셔너리로 변환
         /// </summary>
         public Dictionary<string, string> ToDictionary()
         {
             return new Dictionary<string, string>
             {
-                //["AutoRoleEnabled"] = AutoRoleEnabled.ToString(),
+                ["GuildId"] = GuildId.ToString(),
                 ["AutoRoleId"] = AutoRoleId?.ToString() ?? "",
 				["AuthChannelId"] = AuthChannelId?.ToString() ?? "",
 				["SpamDetectionInterval"] = SpamDetectionInterval.ToString(),
@@ -55,8 +76,8 @@ namespace SeagullDiscordBot
         /// </summary>
         public void FromDictionary(Dictionary<string, string> dict)
         {
-            //if (dict.TryGetValue("AutoRoleEnabled", out string? autoRoleEnabled) && bool.TryParse(autoRoleEnabled, out bool autoRoleEnabledValue))
-            //    AutoRoleEnabled = autoRoleEnabledValue;
+            if (dict.TryGetValue("GuildId", out string? guildId) && ulong.TryParse(guildId, out ulong guildIdValue))
+                GuildId = guildIdValue;
 
             if (dict.TryGetValue("AutoRoleId", out string? autoRoleId) && !string.IsNullOrEmpty(autoRoleId) && ulong.TryParse(autoRoleId, out ulong autoRoleIdValue))
                 AutoRoleId = autoRoleIdValue;

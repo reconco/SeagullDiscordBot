@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Html_KOR_Link_Decoder/1.0.0": {
+        "runtime": {
+          "Html_KOR_Link_Decoder.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Html_KOR_Link_Decoder/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

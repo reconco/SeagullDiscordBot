@@ -52,8 +52,7 @@ namespace SeagullDiscordBot.Modules
 			string botInfo = 
 				$"갈매기 봇 정보\n" +
 				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}\n" +
-				$"현재 서버: {Context.Guild.Name} (ID: {Context.Guild.Id})";
-				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}" +
+				$"현재 서버: {Context.Guild.Name} (ID: {Context.Guild.Id})\n" +
 				$"매뉴얼 : https://reconco.github.io/SeagullDiscordBot/";
 
 			await RespondAsync(botInfo, ephemeral: true);

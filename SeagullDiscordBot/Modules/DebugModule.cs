@@ -29,8 +29,8 @@ namespace SeagullDiscordBot.Modules
 					? Context.Guild.GetTextChannel(settings.AuthChannelId.Value)?.Name ?? "채널을 찾을 수 없음" 
 					: "";
 
-				embed.AddField("🎭 자동 역할 부여", settings.AutoRoleEnabled ? "✅" : "❌");
-				embed.AddField("🏷️ 자동 역할", 
+				embed.AddField("🎭 캡챠 인증 시스템", settings.AutoRoleEnabled ? "✅" : "❌");
+				embed.AddField("🏷️ 캡챠 인증시 역할 ID", 
 					settings.AutoRoleId.HasValue ? $"{authRoleName} ({settings.AutoRoleId})" : "❌ 설정되지 않음");
 				embed.AddField("📢 인증 채널", 
 					settings.AuthChannelId.HasValue ? $"{authChannelName} ({settings.AuthChannelId})" : "❌ 설정되지 않음");
@@ -53,6 +53,8 @@ namespace SeagullDiscordBot.Modules
 				$"갈매기 봇 정보\n" +
 				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}\n" +
 				$"현재 서버: {Context.Guild.Name} (ID: {Context.Guild.Id})";
+				$"봇 버전: {System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}" +
+				$"매뉴얼 : https://reconco.github.io/SeagullDiscordBot/";
 
 			await RespondAsync(botInfo, ephemeral: true);
 

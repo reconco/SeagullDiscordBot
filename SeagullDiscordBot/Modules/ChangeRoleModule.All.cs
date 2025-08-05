@@ -108,7 +108,7 @@ namespace SeagullDiscordBot.Modules
 						Logger.Print($"사용자 '{user.Username}'에게 역할 추가 실패: {result.ErrorMessage}", LogType.ERROR);
 					}
 
-					await Task.Delay(1000);
+					await Task.Delay(500);
 				}
 
 				await FollowupAsync($"역할 추가 완료: 총 {totalUsers}명 중 {successCount}명 성공, {errorCount}명 실패\n(관리자 및 봇 {excludedCount}명 제외됨)", ephemeral: true);
@@ -183,7 +183,7 @@ namespace SeagullDiscordBot.Modules
 						Logger.Print($"사용자 '{user.Username}'에게서 역할 제거 실패: {result.ErrorMessage}`", LogType.ERROR);
 					}
 
-					await Task.Delay(1000);
+					await Task.Delay(500);
 				}
 
 				await FollowupAsync($"역할 제거 완료: 총 {totalUsers}명 중 {successCount}명 성공, {errorCount}명 실패\n(관리자 및 봇 {excludedCount}명 제외됨)`", ephemeral: true);

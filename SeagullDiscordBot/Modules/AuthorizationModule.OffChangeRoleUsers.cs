@@ -77,8 +77,8 @@ namespace SeagullDiscordBot.Modules
 						Logger.Print($"사용자 '{user.Username}'에게서 역할 제거 실패: {result.ErrorMessage}", LogType.ERROR);
 					}
 
-					// API 제한을 피하기 위해 1초 대기
-					await Task.Delay(1000);
+					// API 제한을 피하기 위해 0.5초 대기
+					await Task.Delay(500);
 				}
 
 				await FollowupAsync($"갈매기 역할 제거 완료: 총 {totalUsers}명 중 {successCount}명 성공, {errorCount}명 실패", ephemeral: true);

@@ -46,7 +46,7 @@ namespace SeagullDiscordBot.Modules
 					if (sendMsg == PermValue.Allow || sendMsg == PermValue.Inherit)
 					{
 						// verifiedRole: 기존 권한에서 메시지 전송만 허용으로 변경  
-						var verifiedPermissions = CreatePermissionsWithSendMessages(basePermissions, sendMsg);
+						var verifiedPermissions = CreatePermissionsWithSendMessages(basePermissions, PermValue.Allow);//sendMsg);
 						await textChannel.AddPermissionOverwriteAsync(verifiedRole, verifiedPermissions);
 					
 						// everyone 역할: 기존 권한에서 메시지 전송만 거부로 변경
@@ -71,7 +71,7 @@ namespace SeagullDiscordBot.Modules
 						await voiceChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
 
 						// verifiedRole: 기존 권한에서 메시지 전송만 허용으로 변경  
-						var verifiedPermissions = CreatePermissionsWithSendMessages(basePermissions, sendMsg);
+						var verifiedPermissions = CreatePermissionsWithSendMessages(basePermissions, PermValue.Allow);//sendMsg);
 						await voiceChannel.AddPermissionOverwriteAsync(verifiedRole, verifiedPermissions);
 					}
 					

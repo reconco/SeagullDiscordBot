@@ -47,6 +47,7 @@ namespace SeagullDiscordBot.Modules
 		}
 
 		[SlashCommand("bot_info", "봇 정보 받기.")]
+		[RequireUserPermission(GuildPermission.Administrator)]
 		public async Task BotInfoCommand()
 		{
 			string botInfo = 
@@ -58,6 +59,19 @@ namespace SeagullDiscordBot.Modules
 			await RespondAsync(botInfo, ephemeral: true);
 
 			Logger.Print($"서버 '{Context.Guild.Name}'({Context.Guild.Id})에서 '{Context.User.Username}'님이 봇 정보를 요청했습니다.");
+		}
+
+
+		[SlashCommand("manual", "봇 매뉴얼")]
+		[RequireUserPermission(GuildPermission.Administrator)]
+		public async Task BotManualCommand()
+		{
+			string botInfo =
+				$"갈매기 봇 매뉴얼 : https://reconco.github.io/SeagullDiscordBot/";
+
+			await RespondAsync(botInfo, ephemeral: true);
+
+			Logger.Print($"'{Context.User.Username}'사용자가 봇 정보를 요청");
 		}
 	}
 }
